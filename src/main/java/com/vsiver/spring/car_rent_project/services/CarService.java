@@ -39,4 +39,9 @@ public class CarService {
         Car car = carRepository.findById(carId).orElseThrow(() -> new NoCarWithSuchIdException("No car with such id"));
         carRepository.delete(car);
     }
+
+    public CarDto findById(Integer carId) throws NoCarWithSuchIdException {
+        Car car = carRepository.findById(carId).orElseThrow(() -> new NoCarWithSuchIdException("No car with such id"));
+        return customMappers.mapCarToCarDto(car);
+    }
 }

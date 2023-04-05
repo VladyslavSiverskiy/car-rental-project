@@ -16,6 +16,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(data, HttpStatus.UNAUTHORIZED);
     }
 
+
+    @ExceptionHandler
+    public ResponseEntity<InfoMessage> handleException(NoCarWithSuchIdException exception){
+        InfoMessage data = new InfoMessage();
+        data.setInfo(exception.getMessage());
+        return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler
     public ResponseEntity<InfoMessage> handleException(Exception exception){
         InfoMessage data = new InfoMessage();

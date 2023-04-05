@@ -18,11 +18,6 @@ public class AdminController {
     @Autowired
     private CarService carService;
 
-    @GetMapping("/cars")
-    public List<CarDto> getAllCars(){
-        return carService.getAllCars();
-    }
-
     @PostMapping("/cars")
     public ResponseEntity<CarDto> addCar(@RequestBody CarDto carDto){
         return ResponseEntity.ok(carService.saveOrUpdateCar(carDto));
