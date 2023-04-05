@@ -2,6 +2,7 @@ package com.vsiver.spring.car_rent_project.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
 @Entity
 @Table(name = "cars")
@@ -10,38 +11,159 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "car_id")
-    public Integer carId;
+    private Integer carId;
 
     @NotNull
     @Column(name = "model")
-    public String carModel;
+    private String carModel;
 
     @ManyToOne
     @JoinColumn(name = "category_id")
-    public Category category;
+    private Category category;
+
+    @Column(name = "year_of_manufacturing")
+    private Integer yearOfManufacturing;
 
     @Column(name = "gearbox_type")
     @Enumerated(EnumType.STRING)
-    public EGearboxTypes gearboxType;
+    private EGearboxTypes gearboxType;
 
     @Column(name = "seats_count")
-    public Integer seatsCount;
+    private Integer seatsCount;
+
+    @Column(name = "engine_volume")
+    private Double engineVolume;
 
     @Column(name = "fuel_type")
     @Enumerated(EnumType.STRING)
-    public EFuelType fuelType;
+    private EFuelType fuelType;
 
     @Column(name = "avg_fuel_consumption")
-    public Double averageFuelConsumption;
+    private Double averageFuelConsumption;
 
     @Column(name = "day_rent_price")
-    public Double dayRentPrice;
+    private Double dayRentPrice;
 
     @Column(name = "location_info")
-    public String locationInfo;
+    private String locationInfo;
 
     @Column(name = "in_stock")
-    public Boolean inStock;
+    private Boolean inStock;
 
+    public Car() {
 
+    }
+
+    public Integer getCarId() {
+        return carId;
+    }
+
+    public void setCarId(Integer carId) {
+        this.carId = carId;
+    }
+
+    public String getCarModel() {
+        return carModel;
+    }
+
+    public void setCarModel(String carModel) {
+        this.carModel = carModel;
+    }
+
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public EGearboxTypes getGearboxType() {
+        return gearboxType;
+    }
+
+    public void setGearboxType(EGearboxTypes gearboxType) {
+        this.gearboxType = gearboxType;
+    }
+
+    public Integer getSeatsCount() {
+        return seatsCount;
+    }
+
+    public void setSeatsCount(Integer seatsCount) {
+        this.seatsCount = seatsCount;
+    }
+
+    public Double getEngineVolume() {
+        return engineVolume;
+    }
+
+    public void setEngineVolume(Double engineVolume) {
+        this.engineVolume = engineVolume;
+    }
+
+    public Integer getYearOfManufacturing() {
+        return yearOfManufacturing;
+    }
+
+    public void setYearOfManufacturing(Integer yearOfManufacturing) {
+        this.yearOfManufacturing = yearOfManufacturing;
+    }
+
+    public EFuelType getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(EFuelType fuelType) {
+        this.fuelType = fuelType;
+    }
+
+    public Double getAverageFuelConsumption() {
+        return averageFuelConsumption;
+    }
+
+    public void setAverageFuelConsumption(Double averageFuelConsumption) {
+        this.averageFuelConsumption = averageFuelConsumption;
+    }
+
+    public Double getDayRentPrice() {
+        return dayRentPrice;
+    }
+
+    public void setDayRentPrice(Double dayRentPrice) {
+        this.dayRentPrice = dayRentPrice;
+    }
+
+    public String getLocationInfo() {
+        return locationInfo;
+    }
+
+    public void setLocationInfo(String locationInfo) {
+        this.locationInfo = locationInfo;
+    }
+
+    public Boolean getInStock() {
+        return inStock;
+    }
+
+    public void setInStock(Boolean inStock) {
+        this.inStock = inStock;
+    }
+
+    @Override
+    public String toString() {
+        return "Car{" +
+               "carId=" + carId +
+               ", carModel='" + carModel + '\'' +
+               ", yearOfManufacturing=" + yearOfManufacturing +
+               ", gearboxType=" + gearboxType +
+               ", seatsCount=" + seatsCount +
+               ", engineVolume=" + engineVolume +
+               ", fuelType=" + fuelType +
+               ", averageFuelConsumption=" + averageFuelConsumption +
+               ", dayRentPrice=" + dayRentPrice +
+               ", locationInfo='" + locationInfo + '\'' +
+               ", inStock=" + inStock +
+               '}';
+    }
 }

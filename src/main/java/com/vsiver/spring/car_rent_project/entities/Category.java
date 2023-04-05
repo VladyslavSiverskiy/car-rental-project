@@ -10,12 +10,12 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "category_id")
-    public Integer categoryId;
+    private Integer categoryId;
 
     @NotNull
     @Column(name = "category_name")
     @Enumerated(EnumType.STRING)
-    public ECategories categoryName;
+    private ECategories categoryName;
 
     public Category() {
     }
