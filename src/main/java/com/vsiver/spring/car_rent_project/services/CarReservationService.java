@@ -1,4 +1,4 @@
-package com.vsiver.spring.car_rent_project.utils;
+package com.vsiver.spring.car_rent_project.services;
 
 import com.vsiver.spring.car_rent_project.entities.Car;
 import com.vsiver.spring.car_rent_project.entities.EOrderState;
@@ -6,7 +6,6 @@ import com.vsiver.spring.car_rent_project.entities.Order;
 import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
 import com.vsiver.spring.car_rent_project.repositories.CarRepository;
 import com.vsiver.spring.car_rent_project.repositories.OrderRepository;
-import com.vsiver.spring.car_rent_project.services.CarService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
@@ -19,7 +18,7 @@ import java.util.Date;
 import java.util.concurrent.ScheduledFuture;
 
 @Component
-public class CarReservation {
+public class CarReservationService {
 
     private TaskScheduler scheduler;
     private ScheduledFuture<?> scheduledTask;
@@ -31,7 +30,7 @@ public class CarReservation {
     private OrderRepository orderRepository;
 
     @Autowired
-    public CarReservation(TaskScheduler scheduler) {
+    public CarReservationService(TaskScheduler scheduler) {
         this.scheduler = scheduler;
     }
 

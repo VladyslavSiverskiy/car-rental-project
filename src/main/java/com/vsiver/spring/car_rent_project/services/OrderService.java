@@ -11,7 +11,6 @@ import com.vsiver.spring.car_rent_project.repositories.CarRepository;
 import com.vsiver.spring.car_rent_project.repositories.OrderRepository;
 import com.vsiver.spring.car_rent_project.user.User;
 import com.vsiver.spring.car_rent_project.user.UserRepository;
-import com.vsiver.spring.car_rent_project.utils.CarReservation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +28,7 @@ public class OrderService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
-    private CarReservation carReservation;
+    private CarReservationService carReservationService;
 
     public boolean orderCar(Integer carId, Integer userId, LocalDateTime rentFrom, LocalDateTime rentTo) throws NoCarWithSuchIdException, NoUserWithSuchIdException, CarOutOfStockException, IncorrectRentTimeException {
         //TODO: set to car when it will be able
@@ -63,9 +62,9 @@ public class OrderService {
         orderRepository.save(order);
 
         if (res == 1) {
-            carReservation.changeCarStateInProcess(rentFrom, car.getCarId(), order.getId());
+            carReservationService.changeCarStateInProcess(rentFrom, car.getCarId(), order.getId());
         }
-        carReservation.setExpiredOrderStatusIfTimeLast(rentTo, order.getId());
+        carReservationService.setExpiredOrderStatusIfTimeLast(rentTo, order.getId());
         return false;
     }
 }
