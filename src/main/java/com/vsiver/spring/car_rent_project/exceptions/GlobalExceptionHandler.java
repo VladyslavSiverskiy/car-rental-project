@@ -2,6 +2,7 @@ package com.vsiver.spring.car_rent_project.exceptions;
 
 import com.vsiver.spring.car_rent_project.dtos.InfoMessage;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,6 +17,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(data, HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler
+    public ResponseEntity<InfoMessage> handleException(MalformedJwtException exception){
+        InfoMessage data = new InfoMessage();
+        data.setInfo(exception.getMessage());
+        return new ResponseEntity<>(data, HttpStatus.UNAUTHORIZED);
+    }
 
     @ExceptionHandler
     public ResponseEntity<InfoMessage> handleException(NoCarWithSuchIdException exception){

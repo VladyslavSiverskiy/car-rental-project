@@ -5,6 +5,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -23,4 +26,6 @@ public class CarDto {
     private Double dayRentalPrice;
     private String locationInfo;
     private Boolean inStock;
+    private LocalDateTime availableTo;
+    private List<ReviewDto> reviews;
 }

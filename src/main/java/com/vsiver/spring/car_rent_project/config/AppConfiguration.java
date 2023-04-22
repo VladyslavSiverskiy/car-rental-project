@@ -5,6 +5,7 @@ import com.vsiver.spring.car_rent_project.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -21,6 +22,7 @@ public class AppConfiguration {
 
     private final UserRepository userRepository;
 
+    //auth
     @Bean
     public UserDetailsService userDetailsService(){
         return username -> userRepository

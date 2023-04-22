@@ -1,6 +1,7 @@
 package com.vsiver.spring.car_rent_project.user;
 
 
+import com.vsiver.spring.car_rent_project.entities.Order;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,6 +31,9 @@ public class User implements UserDetails {
     private String pass;
 
     private String phoneNumber;
+
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders;
 
     @Enumerated(EnumType.STRING)
     private Role role;

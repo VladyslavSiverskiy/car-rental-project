@@ -2,10 +2,14 @@ package com.vsiver.spring.car_rent_project.utils;
 
 
 import com.vsiver.spring.car_rent_project.dtos.CarDto;
+import com.vsiver.spring.car_rent_project.dtos.ReviewDto;
 import com.vsiver.spring.car_rent_project.entities.*;
 import com.vsiver.spring.car_rent_project.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class CustomMappers {
@@ -27,6 +31,18 @@ public class CustomMappers {
         carDto.setInStock(car.getInStock());
         carDto.setLocationInfo(car.getLocationInfo());
         carDto.setYearOfManufacturing(car.getYearOfManufacturing());
+        carDto.setAvailableTo(car.getAvailableTo());
+
+        List<ReviewDto> reviewDto = car.getCarReviews().stream()
+                .map(review -> new ReviewDto(
+                        review.getId(),
+                        review.getUser().getFirstName(),
+                        review.getUser().getLastName(),
+                        review.getDescription(),
+                        review.getRate()
+                )).collect(Collectors.toList());
+        carDto.setReviews(reviewDto);
+
         return carDto;
     }
 
@@ -72,7 +88,7 @@ public class CustomMappers {
         car.setYearOfManufacturing(carDto.getYearOfManufacturing());
         car.setLocationInfo(carDto.getLocationInfo());
         car.setInStock(carDto.getInStock());
-
+        car.setAvailableTo(carDto.getAvailableTo());
         return car;
     }
 }

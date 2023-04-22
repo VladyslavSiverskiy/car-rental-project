@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Entity
 @Table(name = "cars")
 public class Car {
@@ -50,8 +53,40 @@ public class Car {
     @Column(name = "in_stock")
     private Boolean inStock;
 
+    @Column(name = "available_to")
+    private LocalDateTime availableTo;
+
+    @OneToMany(mappedBy = "car")
+    List<Order> carOrderList;
+
+    @OneToMany(mappedBy = "car")
+    List<Review> carReviews;
     public Car() {
 
+    }
+
+    public void setCarOrderList(List<Order> carOrderList) {
+        this.carOrderList = carOrderList;
+    }
+
+    public List<Review> getCarReviews() {
+        return carReviews;
+    }
+
+    public void setCarReviews(List<Review> carReviews) {
+        this.carReviews = carReviews;
+    }
+
+    public LocalDateTime getAvailableTo() {
+        return availableTo;
+    }
+
+    public void setAvailableTo(LocalDateTime availableTo) {
+        this.availableTo = availableTo;
+    }
+
+    public List<Order> getCarOrderList() {
+        return carOrderList;
     }
 
     public Integer getCarId() {
