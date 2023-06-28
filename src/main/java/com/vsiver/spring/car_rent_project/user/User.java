@@ -1,6 +1,7 @@
 package com.vsiver.spring.car_rent_project.user;
 
 
+import com.vsiver.spring.car_rent_project.entities.Like;
 import com.vsiver.spring.car_rent_project.entities.Order;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,16 +32,23 @@ public class User implements UserDetails {
     private String pass;
 
     private String phoneNumber;
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
 
     @OneToMany(mappedBy = "user")
     private List<Order> orders;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @OneToMany(mappedBy = "user")
+    private List<Like> likes;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
+    }
+
+    public List<Like> getLikes() {
+        return likes;
     }
 
     @Override

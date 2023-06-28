@@ -17,6 +17,7 @@ public class CarDto {
     private Integer carId;
     private String model;
     private String categoryName;
+    private String description;
     private String gearboxType;
     private Integer seatsCount;
     private Double engineVolume;
@@ -28,4 +29,5 @@ public class CarDto {
     private Boolean inStock;
     private LocalDateTime availableTo;
     private List<ReviewDto> reviews;
+
 }

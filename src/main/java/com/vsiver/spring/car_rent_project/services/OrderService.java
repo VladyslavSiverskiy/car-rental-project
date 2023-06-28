@@ -3,10 +3,7 @@ package com.vsiver.spring.car_rent_project.services;
 import com.vsiver.spring.car_rent_project.entities.Car;
 import com.vsiver.spring.car_rent_project.entities.EOrderState;
 import com.vsiver.spring.car_rent_project.entities.Order;
-import com.vsiver.spring.car_rent_project.exceptions.CarOutOfStockException;
-import com.vsiver.spring.car_rent_project.exceptions.IncorrectRentTimeException;
-import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
-import com.vsiver.spring.car_rent_project.exceptions.NoUserWithSuchIdException;
+import com.vsiver.spring.car_rent_project.exceptions.*;
 import com.vsiver.spring.car_rent_project.repositories.CarRepository;
 import com.vsiver.spring.car_rent_project.repositories.OrderRepository;
 import com.vsiver.spring.car_rent_project.user.User;
@@ -15,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Transactional
@@ -27,10 +25,11 @@ public class OrderService {
     private CarRepository carRepository;
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private CarReservationService carReservationService;
 
-    public boolean orderCar(Integer carId, Integer userId, LocalDateTime rentFrom, LocalDateTime rentTo) throws NoCarWithSuchIdException, NoUserWithSuchIdException, CarOutOfStockException, IncorrectRentTimeException {
+    public boolean orderCar(Integer carId, Integer userId, LocalDateTime rentFrom, LocalDateTime rentTo, BigDecimal orderSum) throws NoCarWithSuchIdException, NoUserWithSuchIdException, CarOutOfStockException, IncorrectRentTimeException {
         //TODO: set to car when it will be able
         Car car = carRepository.findById(carId).orElseThrow(() -> new NoCarWithSuchIdException("No car with such id!"));
         User user = userRepository.findById(userId).orElseThrow(() -> new NoUserWithSuchIdException("No user with such id!"));
@@ -45,20 +44,18 @@ public class OrderService {
         if (res != 1) {
             car.setInStock(false);
             order.setOrderState(EOrderState.IN_PROCESS);
-            order.setRentFrom(rentFrom);
-            order.setRentTo(rentTo);
-            order.setUser(user);
-            order.setCar(car);
             //змінити InStock на true після завершення
         } else {//резервування
-            order.setOrderState(EOrderState.IS_RESERVED);
             car.setAvailableTo(rentFrom);
-            order.setRentFrom(rentFrom);
-            order.setRentTo(rentTo);
-            order.setUser(user);
-            order.setCar(car);
+            order.setOrderState(EOrderState.IS_RESERVED);
+
             //змінити дані в момент 5 год
         }
+        order.setRentFrom(rentFrom);
+        order.setRentTo(rentTo);
+        order.setUser(user);
+        order.setCar(car);
+        order.setOrderSum(orderSum);
         orderRepository.save(order);
 
         if (res == 1) {
@@ -66,5 +63,18 @@ public class OrderService {
         }
         carReservationService.setExpiredOrderStatusIfTimeLast(rentTo, order.getId());
         return false;
+    }
+
+    /**
+     * Admin send request when customer will return car to parking location and order status in database is changed
+     * */
+    public boolean submitOrder(Long orderId) throws NoCarWithSuchIdException {
+        Order order = orderRepository.findById(orderId).orElseThrow(() -> new NoOrderWithSuchIdException("Order with such id doesn`t exist"));
+        order.setOrderState(EOrderState.FINISHED);
+        Car car = carRepository.findById(order.getCar().getCarId()).orElseThrow(()->new NoCarWithSuchIdException("No car with such id"));
+        car.setInStock(true);
+        carRepository.save(car);
+        orderRepository.save(order);
+        return true;
     }
 }

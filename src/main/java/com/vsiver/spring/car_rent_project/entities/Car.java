@@ -20,6 +20,9 @@ public class Car {
     @Column(name = "model")
     private String carModel;
 
+    @Column(name = "car_description")
+    private String description;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
@@ -63,6 +66,14 @@ public class Car {
     List<Review> carReviews;
     public Car() {
 
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setCarOrderList(List<Order> carOrderList) {

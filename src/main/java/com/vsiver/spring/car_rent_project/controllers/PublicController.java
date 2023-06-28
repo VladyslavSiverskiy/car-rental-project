@@ -6,24 +6,27 @@ import com.vsiver.spring.car_rent_project.exceptions.IncorrectRentTimeException;
 import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
 import com.vsiver.spring.car_rent_project.exceptions.NoUserWithSuchIdException;
 import com.vsiver.spring.car_rent_project.services.CarService;
+import com.vsiver.spring.car_rent_project.services.EmailService;
 import com.vsiver.spring.car_rent_project.services.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
+//@CrossOrigin(origins = "http://localhost:3000")
 @RequestMapping("/api/v1/public")
 public class PublicController {
 
     @Autowired
     private CarService carService;
+
+    @Autowired
+    private EmailService emailService;
 
     //TODO:Remove order service from here
     @Autowired
@@ -49,9 +52,14 @@ public class PublicController {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         LocalDateTime dateFrom = LocalDateTime.parse(from, formatter);
         LocalDateTime dateTo = LocalDateTime.parse(to, formatter);
+        BigDecimal orderSum = BigDecimal.valueOf(15000);
 
+        orderService.orderCar(1,3, dateFrom, dateTo, orderSum);
+    }
 
-        orderService.orderCar(1,3, dateFrom, dateTo);
+    @GetMapping("/email")
+    public void testEmail(){
+        emailService.sendEmail("siverskijvladislav@gmail.com", "Звіт з практики", "Надсилаю тобі звіт");
     }
 
 }

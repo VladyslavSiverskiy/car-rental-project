@@ -4,7 +4,9 @@ package com.vsiver.spring.car_rent_project.controllers;
 import com.vsiver.spring.car_rent_project.config.JwtService;
 import com.vsiver.spring.car_rent_project.dtos.AuthenticationRequest;
 import com.vsiver.spring.car_rent_project.dtos.AuthenticationResponse;
+import com.vsiver.spring.car_rent_project.dtos.InfoMessage;
 import com.vsiver.spring.car_rent_project.dtos.RegisterRequest;
+import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
 import com.vsiver.spring.car_rent_project.user.Role;
 import com.vsiver.spring.car_rent_project.user.User;
 import com.vsiver.spring.car_rent_project.user.UserRepository;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+
 @RequestMapping("/api/v1/public/auth")
 @RequiredArgsConstructor
 public class AuthController {
@@ -31,7 +34,8 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest registerRequest) throws NoCarWithSuchIdException {
+
         var user = User.builder()
                 .firstName(registerRequest.getFirstname())
                 .lastName(registerRequest.getLastname())
@@ -40,7 +44,12 @@ public class AuthController {
                 .phoneNumber(registerRequest.getPhoneNumber())
                 .role(Role.ADMIN)
                 .build();
-        userRepository.save(user);
+        if(!userRepository.findByEmail(user.getEmail()).isPresent()){
+            userRepository.save(user);
+        }else{
+            throw new NoCarWithSuchIdException("such user exists");
+        }
+
         var jwtToken = jwtService.generateToken(user);
         return ResponseEntity.ok(AuthenticationResponse.builder().jwt(jwtToken).build());
     }

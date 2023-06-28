@@ -21,6 +21,7 @@ public class CustomMappers {
         CarDto carDto = new CarDto();
         carDto.setCarId(car.getCarId());
         carDto.setModel(car.getCarModel());
+        carDto.setDescription(car.getDescription());
         if(car.getCategory() != null) carDto.setCategoryName(car.getCategory().getCategoryName().name());
         if(car.getGearboxType() != null) carDto.setGearboxType(car.getGearboxType().name());
         carDto.setSeatsCount(car.getSeatsCount());
@@ -79,6 +80,7 @@ public class CustomMappers {
         car.setCarId(carDto.getCarId());
         car.setCarModel(carDto.getModel());
         car.setCategory(category);
+        car.setDescription(carDto.getDescription());
         car.setFuelType(fuelType);
         car.setEngineVolume(carDto.getEngineVolume());
         car.setDayRentPrice(carDto.getDayRentalPrice());

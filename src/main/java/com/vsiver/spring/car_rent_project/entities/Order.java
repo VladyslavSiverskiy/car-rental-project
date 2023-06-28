@@ -5,6 +5,7 @@ import com.vsiver.spring.car_rent_project.user.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -38,17 +39,32 @@ public class Order {
     @Column(name = "rent_to")
     private LocalDateTime rentTo;
 
+    @Column(name = "order_sum")
+    private BigDecimal orderSum;
+
+    @Column(name = "is_payed")
+    private Boolean isPayed;
     public Order() {
 
     }
 
-    public Order(Long id, User user, Car car, EOrderState orderState, LocalDateTime rentFrom, LocalDateTime rentTo) {
+    public Order(EOrderState orderState, LocalDateTime rentFrom, LocalDateTime rentTo, BigDecimal orderSum, Boolean isPayed) {
+        this.orderState = orderState;
+        this.rentFrom = rentFrom;
+        this.rentTo = rentTo;
+        this.orderSum = orderSum;
+        this.isPayed = isPayed;
+    }
+
+    public Order(Long id, User user, Car car, EOrderState orderState, LocalDateTime rentFrom, LocalDateTime rentTo, BigDecimal orderSum, Boolean isPayed) {
         this.id = id;
         this.user = user;
         this.car = car;
         this.orderState = orderState;
         this.rentFrom = rentFrom;
         this.rentTo = rentTo;
+        this.orderSum = orderSum;
+        this.isPayed = isPayed;
     }
 
     public Long getId() {
@@ -97,5 +113,21 @@ public class Order {
 
     public void setRentTo(LocalDateTime rentTo) {
         this.rentTo = rentTo;
+    }
+
+    public BigDecimal getOrderSum() {
+        return orderSum;
+    }
+
+    public void setOrderSum(BigDecimal orderSum) {
+        this.orderSum = orderSum;
+    }
+
+    public Boolean getPayed() {
+        return isPayed;
+    }
+
+    public void setPayed(Boolean payed) {
+        isPayed = payed;
     }
 }
