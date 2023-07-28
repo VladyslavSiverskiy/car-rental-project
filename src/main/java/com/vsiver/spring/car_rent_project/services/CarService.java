@@ -31,6 +31,7 @@ public class CarService {
 
     public CarDto saveOrUpdateCar(CarDto carDto) {
         Car car = customMappers.mapCarDtoToCar(carDto);
+        System.out.println(car);
         carRepository.save(car);
         return customMappers.mapCarToCarDto(car);
     }

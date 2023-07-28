@@ -34,7 +34,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<InfoMessage> handleException(Exception exception){
         InfoMessage data = new InfoMessage();
-        data.setInfo(exception.getMessage());
+        System.out.println(exception);
+        data.setInfo(exception.toString());
         return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
     }
 }

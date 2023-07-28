@@ -36,13 +36,14 @@ public class CarReservationService {
 
     @Transactional
     void updateCarState(Integer carId, Long orderId) throws NoCarWithSuchIdException {
-        Car car = carRepository.findById(carId).orElseThrow(()->new NoCarWithSuchIdException("Can`t find such car"));
+        Car car = carRepository.findById(carId).orElseThrow(() -> new NoCarWithSuchIdException("Can`t find such car"));
         car.setInStock(false);
         Order order = orderRepository.findById(orderId).get();
         order.setOrderState(EOrderState.IN_PROCESS);
         carRepository.save(car);
         orderRepository.save(order);
         System.out.println("Saved");
+
     }
 
     public void changeCarStateInProcess(LocalDateTime reserveFromTime, Integer carId, Long orderId) {
@@ -64,7 +65,7 @@ public class CarReservationService {
         }, instant);
     }
 
-    public void setExpiredOrderStatusIfTimeLast(LocalDateTime reserveToTime, Long orderId){
+    public void setExpiredOrderStatusIfTimeLast(LocalDateTime reserveToTime, Long orderId) {
         Instant instant = reserveToTime.atZone(ZoneId.systemDefault()).toInstant();
         if (scheduledTask != null) {
             scheduledTask.cancel(false);
@@ -72,7 +73,7 @@ public class CarReservationService {
         }
         scheduledTask = scheduler.schedule(() -> {
             Order order = orderRepository.findById(orderId).get();
-            if(!order.getOrderState().equals(EOrderState.FINISHED)) {
+            if (!order.getOrderState().equals(EOrderState.FINISHED)) {
                 order.setOrderState(EOrderState.EXPIRED);
                 //TODO:sent notification on email;
             }

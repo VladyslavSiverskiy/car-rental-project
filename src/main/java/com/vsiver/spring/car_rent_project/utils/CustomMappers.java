@@ -18,7 +18,9 @@ public class CustomMappers {
     private CategoryRepository categoryRepository;
 
     public CarDto mapCarToCarDto(Car car){
-        CarDto carDto = new CarDto();
+        return CarDto.fromCar(car);
+
+/*      CarDto carDto = new CarDto();
         carDto.setCarId(car.getCarId());
         carDto.setModel(car.getCarModel());
         carDto.setDescription(car.getDescription());
@@ -33,7 +35,7 @@ public class CustomMappers {
         carDto.setLocationInfo(car.getLocationInfo());
         carDto.setYearOfManufacturing(car.getYearOfManufacturing());
         carDto.setAvailableTo(car.getAvailableTo());
-
+        if(car.getCarReviews() == null) return carDto;
         List<ReviewDto> reviewDto = car.getCarReviews().stream()
                 .map(review -> new ReviewDto(
                         review.getId(),
@@ -43,8 +45,7 @@ public class CustomMappers {
                         review.getRate()
                 )).collect(Collectors.toList());
         carDto.setReviews(reviewDto);
-
-        return carDto;
+        return carDto;*/
     }
 
 
