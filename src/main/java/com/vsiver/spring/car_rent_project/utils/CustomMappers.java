@@ -19,33 +19,6 @@ public class CustomMappers {
 
     public CarDto mapCarToCarDto(Car car){
         return CarDto.fromCar(car);
-
-/*      CarDto carDto = new CarDto();
-        carDto.setCarId(car.getCarId());
-        carDto.setModel(car.getCarModel());
-        carDto.setDescription(car.getDescription());
-        if(car.getCategory() != null) carDto.setCategoryName(car.getCategory().getCategoryName().name());
-        if(car.getGearboxType() != null) carDto.setGearboxType(car.getGearboxType().name());
-        carDto.setSeatsCount(car.getSeatsCount());
-        carDto.setEngineVolume(car.getEngineVolume());
-        if (car.getFuelType() != null) carDto.setFuelType(car.getFuelType().name());
-        carDto.setAvgFuelConsumption(car.getAverageFuelConsumption());
-        carDto.setDayRentalPrice(car.getDayRentPrice());
-        carDto.setInStock(car.getInStock());
-        carDto.setLocationInfo(car.getLocationInfo());
-        carDto.setYearOfManufacturing(car.getYearOfManufacturing());
-        carDto.setAvailableTo(car.getAvailableTo());
-        if(car.getCarReviews() == null) return carDto;
-        List<ReviewDto> reviewDto = car.getCarReviews().stream()
-                .map(review -> new ReviewDto(
-                        review.getId(),
-                        review.getUser().getFirstName(),
-                        review.getUser().getLastName(),
-                        review.getDescription(),
-                        review.getRate()
-                )).collect(Collectors.toList());
-        carDto.setReviews(reviewDto);
-        return carDto;*/
     }
 
 
@@ -60,7 +33,6 @@ public class CustomMappers {
         } else if (carDto.getCategoryName().equalsIgnoreCase("COMFORT")){
             category = categoryRepository.findByCategoryName(ECategories.COMFORT).get();
         }
-
         EGearboxTypes gearboxType = carDto
                 .getGearboxType()
                 .equalsIgnoreCase("MANUAL") ?
@@ -75,9 +47,7 @@ public class CustomMappers {
         } else if(carDto.getFuelType().equalsIgnoreCase("DIESEL")){
             fuelType = EFuelType.DIESEL;
         }
-        System.out.println(fuelType);
         Car car = new Car();
-
         car.setCarId(carDto.getCarId());
         car.setCarModel(carDto.getModel());
         car.setCategory(category);
