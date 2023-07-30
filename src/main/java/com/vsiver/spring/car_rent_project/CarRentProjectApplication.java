@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @SpringBootApplication
 @EnableScheduling
 public class CarRentProjectApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(CarRentProjectApplication.class, args);
     }
