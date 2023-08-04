@@ -51,6 +51,7 @@ public class AdminController {
 
     @PostMapping("/cars")
     public ResponseEntity<CarDto> addCar(@RequestBody CarDto carDto) {
+        System.out.println(carDto);
         return ResponseEntity.ok(carService.saveOrUpdateCar(carDto));
     }
 

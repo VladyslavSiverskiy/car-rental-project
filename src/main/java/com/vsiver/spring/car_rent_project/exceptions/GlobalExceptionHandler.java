@@ -35,6 +35,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<InfoMessage> handleException(Exception exception){
         InfoMessage data = new InfoMessage();
         System.out.println(exception);
+        exception.printStackTrace();
         data.setInfo(exception.toString());
         return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
     }

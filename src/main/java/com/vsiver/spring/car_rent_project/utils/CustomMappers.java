@@ -50,6 +50,7 @@ public class CustomMappers {
 
 
     public Car mapCarDtoToCar(CarDto carDto){
+        System.out.println(carDto);
         Category category = null;
         if (carDto.getCategoryName().equalsIgnoreCase("SUV")) {
             category = categoryRepository.findByCategoryName(ECategories.SUV).get();

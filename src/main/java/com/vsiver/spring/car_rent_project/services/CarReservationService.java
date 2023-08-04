@@ -35,7 +35,7 @@ public class CarReservationService {
     }
 
     @Transactional
-    void updateCarState(Integer carId, Long orderId) throws NoCarWithSuchIdException {
+    public void updateCarState(Integer carId, Long orderId) throws NoCarWithSuchIdException {
         Car car = carRepository.findById(carId).orElseThrow(() -> new NoCarWithSuchIdException("Can`t find such car"));
         car.setInStock(false);
         Order order = orderRepository.findById(orderId).get();
