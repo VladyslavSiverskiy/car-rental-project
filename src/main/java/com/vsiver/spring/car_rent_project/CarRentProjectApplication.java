@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @SpringBootApplication
 @EnableScheduling
 public class CarRentProjectApplication {
-
     public static void main(String[] args) {
         System.out.println(LocalDateTime.now());
         SpringApplication.run(CarRentProjectApplication.class, args);
