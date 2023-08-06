@@ -1,4 +1,4 @@
-package com.vsiver.spring.car_rent_project.s3;
+package com.vsiver.spring.car_rent_project.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

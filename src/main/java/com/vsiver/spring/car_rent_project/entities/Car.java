@@ -3,6 +3,7 @@ package com.vsiver.spring.car_rent_project.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -56,6 +57,7 @@ public class Car {
     @Column(name = "in_stock")
     private Boolean inStock;
 
+    @CreationTimestamp
     @Column(name = "available_to")
     private LocalDateTime availableTo;
 

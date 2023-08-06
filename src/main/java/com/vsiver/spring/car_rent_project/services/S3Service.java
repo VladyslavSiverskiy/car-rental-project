@@ -1,4 +1,4 @@
-package com.vsiver.spring.car_rent_project.s3;
+package com.vsiver.spring.car_rent_project.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
