@@ -44,9 +44,9 @@ public class AuthController {
                 .phoneNumber(registerRequest.getPhoneNumber())
                 .role(Role.ADMIN)
                 .build();
-        if(!userRepository.findByEmail(user.getEmail()).isPresent()){
+        if (!userRepository.findByEmail(user.getEmail()).isPresent()) {
             userRepository.save(user);
-        }else{
+        } else {
             throw new NoCarWithSuchIdException("such user exists");
         }
 
@@ -57,22 +57,16 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponse> authenticate(@RequestBody AuthenticationRequest authenticationRequest) {
-        System.out.println("HERE 1");
         System.out.println(authenticationRequest.getEmail());
         System.out.println(authenticationRequest.getPassword());
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            authenticationRequest.getEmail(),
-                            authenticationRequest.getPassword()
-                    )
-            );
-        }catch (Exception e){
-            e.printStackTrace();
-            throw e;
-        }
-        System.out.println("HERE 2");
-        var user = userRepository
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        authenticationRequest.getEmail(),
+                        authenticationRequest.getPassword()
+                )
+        );
+
+        User user = userRepository
                 .findByEmail(authenticationRequest.getEmail())
                 .get();
         System.out.println(user);

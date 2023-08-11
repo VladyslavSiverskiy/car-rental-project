@@ -39,8 +39,6 @@ public class PublicController {
     @Autowired
     private OrderService orderService;
 
-    @Autowired
-    private PaymentService paymentService;
 
     @GetMapping("/cars/{carId}/picture")
     public String downloadPicture(@PathVariable Integer carId) throws IOException {
@@ -78,27 +76,6 @@ public class PublicController {
         orderService.orderCar(1, 3, dateFrom, dateTo, orderSum);
     }
 
-    @GetMapping("/orders/capture")
-    public RedirectView captureOrder(@RequestParam String token){
-        //FIXME(Never Do this either put it in proper scope or in DB)
-        String orderId = token;
-        System.out.println(orderId);
-        paymentService.captureOrder(token);
-        return new RedirectView("http://localhost:3000/");
-    }
-
-    @PostMapping("/orders/create")
-    public String createOrder(@RequestBody RequestOrderDto requestOrder, HttpServletRequest request) throws IOException {
-        URI returnUrl = buildReturnUrl(request);
-        System.out.println(returnUrl);
-        System.out.println(requestOrder.getTotalAmount());
-        if(Objects.isNull(requestOrder.getTotalAmount())) throw new IllegalArgumentException("Amount is null");
-
-        CreatedOrderDto createdOrder = paymentService.createOrder(requestOrder.getTotalAmount(), returnUrl);
-        System.out.println(createdOrder);
-        return "" + createdOrder.getApprovalLink();
-    }
-
 
 
     @GetMapping("/email")
@@ -106,18 +83,6 @@ public class PublicController {
         emailService.sendEmail("siverskijvladislav@gmail.com", "Звіт з практики", "Надсилаю тобі звіт");
     }
 
-    private URI buildReturnUrl(HttpServletRequest request) {
-        try {
-            URI requestUri = URI.create(request.getRequestURL().toString());
-            return new URI(requestUri.getScheme(),
-                    requestUri.getUserInfo(),
-                    requestUri.getHost(),
-                    requestUri.getPort(),
-                    "/api/v1/public/orders/capture",
-                    null, null);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
-    }
+
 
 }

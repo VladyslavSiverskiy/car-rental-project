@@ -2,6 +2,7 @@ package com.vsiver.spring.car_rent_project.utils;
 
 
 import com.vsiver.spring.car_rent_project.dtos.CarDto;
+import com.vsiver.spring.car_rent_project.dtos.OrderDto;
 import com.vsiver.spring.car_rent_project.dtos.ReviewDto;
 import com.vsiver.spring.car_rent_project.entities.*;
 import com.vsiver.spring.car_rent_project.repositories.CategoryRepository;
@@ -64,5 +65,21 @@ public class CustomMappers {
         car.setInStock(carDto.getInStock());
         car.setAvailableTo(carDto.getAvailableTo());
         return car;
+    }
+
+    public static OrderDto mapOrderToOrderDto(Order order){
+        return OrderDto.builder()
+                .orderId(order.getId())
+                .carModel(order.getCar().getCarModel())
+                .userId(Long.valueOf(order.getUser().getId()))
+                .orderState(order.getOrderState())
+                .creationTime(order.getCreationTime())
+                .rentFrom(order.getRentFrom())
+                .rentTo(order.getRentTo())
+                .orderSum(order.getOrderSum())
+                .isPayed(order.getPayed())
+                .payPalOrderId(order.getPayPalOrderId())
+                .paymentReference(order.getPaymentReference())
+                .build();
     }
 }

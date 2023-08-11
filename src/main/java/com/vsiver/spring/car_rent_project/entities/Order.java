@@ -29,7 +29,7 @@ public class Order {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "order_state")
-    private EOrderState orderState;
+    private EOrderState orderState; //here save program order state
 
     @NotNull
     @Column(name = "rent_from")
@@ -38,33 +38,50 @@ public class Order {
     @NotNull
     @Column(name = "rent_to")
     private LocalDateTime rentTo;
-
+    @NotNull
     @Column(name = "order_sum")
     private BigDecimal orderSum;
 
+    @NotNull
+    @Column(name = "payment_reference")
+    private String paymentReference;
+
+    @Column(name = "payment_order_id")
+    private String payPalOrderId;
+
+    @Column(name = "created_at")
+    private LocalDateTime creationTime;
+
+    @NotNull
     @Column(name = "is_payed")
     private Boolean isPayed;
+
     public Order() {
 
     }
 
-    public Order(EOrderState orderState, LocalDateTime rentFrom, LocalDateTime rentTo, BigDecimal orderSum, Boolean isPayed) {
-        this.orderState = orderState;
-        this.rentFrom = rentFrom;
-        this.rentTo = rentTo;
-        this.orderSum = orderSum;
-        this.isPayed = isPayed;
+    public String getPaymentReference() {
+        return paymentReference;
     }
 
-    public Order(Long id, User user, Car car, EOrderState orderState, LocalDateTime rentFrom, LocalDateTime rentTo, BigDecimal orderSum, Boolean isPayed) {
-        this.id = id;
-        this.user = user;
-        this.car = car;
-        this.orderState = orderState;
-        this.rentFrom = rentFrom;
-        this.rentTo = rentTo;
-        this.orderSum = orderSum;
-        this.isPayed = isPayed;
+    public void setPaymentReference(String paymentReference) {
+        this.paymentReference = paymentReference;
+    }
+
+    public String getPayPalOrderId() {
+        return payPalOrderId;
+    }
+
+    public void setPayPalOrderId(String payPalOrderId) {
+        this.payPalOrderId = payPalOrderId;
+    }
+
+    public LocalDateTime getCreationTime() {
+        return creationTime;
+    }
+
+    public void setCreationTime(LocalDateTime creationTime) {
+        this.creationTime = creationTime;
     }
 
     public Long getId() {

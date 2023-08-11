@@ -6,6 +6,7 @@ import com.vsiver.spring.car_rent_project.entities.Order;
 import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
 import com.vsiver.spring.car_rent_project.repositories.CarRepository;
 import com.vsiver.spring.car_rent_project.repositories.OrderRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
@@ -22,16 +23,14 @@ public class CarReservationService {
 
     private TaskScheduler scheduler;
     private ScheduledFuture<?> scheduledTask;
-
-    @Autowired
     private CarRepository carRepository;
-
-    @Autowired
     private OrderRepository orderRepository;
 
     @Autowired
-    public CarReservationService(TaskScheduler scheduler) {
+    public CarReservationService(TaskScheduler scheduler, CarRepository carRepository, OrderRepository orderRepository) {
         this.scheduler = scheduler;
+        this.carRepository = carRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Transactional
@@ -46,6 +45,14 @@ public class CarReservationService {
 
     }
 
+
+    /**
+     * Method, which schedules changing of the order state (from IS_RESERVED to IN_PROCESS)
+     *
+     * @param reserveFromTime - date, when schedule make set order state IN_PROCESS
+     * @param carId - car, where value of availableTo and available will be changed
+     * @param orderId - order to manipulate
+     */
     public void changeCarStateInProcess(LocalDateTime reserveFromTime, Integer carId, Long orderId) {
         Instant instant = reserveFromTime.minusHours(5).atZone(ZoneId.systemDefault()).toInstant();
         System.out.println("Reserved car with id " + carId + ", order id " + orderId);
