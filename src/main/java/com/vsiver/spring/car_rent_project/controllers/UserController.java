@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -108,6 +110,9 @@ public class UserController {
     @PostMapping("/orders/create")
     public ResponseEntity<CreatedOrderDto> createOrder(@RequestBody RequestOrderDto requestOrder, HttpServletRequest request) throws IOException, NoCarWithSuchIdException, NoUserWithSuchIdException, CarOutOfStockException, IncorrectRentTimeException {
         URI returnUrl = buildReturnUrl(request);
+        System.out.println(requestOrder);
+        requestOrder.setRentFrom(requestOrder.getRentFrom().plusHours(3));
+        requestOrder.setRentTo(requestOrder.getRentTo().plusHours(3));
         if (Objects.isNull(requestOrder.getTotalAmount())) throw new IllegalArgumentException("Amount is null");
         CreatedOrderDto createdOrder = paymentService.createOrder(requestOrder.getTotalAmount(), returnUrl);
         orderService.createProgramOrder(
@@ -134,6 +139,8 @@ public class UserController {
     @GetMapping("/orders/capture")
     public RedirectView captureOrder(@RequestParam String token) {
         //FIXME(Never Do this either put it in proper scope or in DB)
+
+        //тут шлях на зміну isPayed
         String orderId = token;
         System.out.println(orderId);
         orderService.getOrderByPaymentServiceId(orderId);

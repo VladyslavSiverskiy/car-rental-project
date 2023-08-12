@@ -3,14 +3,10 @@ package com.vsiver.spring.car_rent_project.utils;
 
 import com.vsiver.spring.car_rent_project.dtos.CarDto;
 import com.vsiver.spring.car_rent_project.dtos.OrderDto;
-import com.vsiver.spring.car_rent_project.dtos.ReviewDto;
 import com.vsiver.spring.car_rent_project.entities.*;
 import com.vsiver.spring.car_rent_project.repositories.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class CustomMappers {
@@ -77,7 +73,7 @@ public class CustomMappers {
                 .rentFrom(order.getRentFrom())
                 .rentTo(order.getRentTo())
                 .orderSum(order.getOrderSum())
-                .isPayed(order.getPayed())
+                .isPayed(order.isPayed())
                 .payPalOrderId(order.getPayPalOrderId())
                 .paymentReference(order.getPaymentReference())
                 .build();

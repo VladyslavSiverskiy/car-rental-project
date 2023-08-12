@@ -63,18 +63,18 @@ public class PublicController {
     }
 
 
-    @GetMapping("/cars/test/{from}/{to}")
-    public void getCarById(@PathVariable String from, @PathVariable String to) throws CarOutOfStockException,
-            NoUserWithSuchIdException,
-            NoCarWithSuchIdException, IncorrectRentTimeException {
-        //2023-04-12T23:00:10
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        LocalDateTime dateFrom = LocalDateTime.parse(from, formatter);
-        LocalDateTime dateTo = LocalDateTime.parse(to, formatter);
-        BigDecimal orderSum = BigDecimal.valueOf(15000);
-
-        orderService.orderCar(1, 3, dateFrom, dateTo, orderSum);
-    }
+//    @GetMapping("/cars/test/{from}/{to}")
+//    public void getCarById(@PathVariable String from, @PathVariable String to) throws CarOutOfStockException,
+//            NoUserWithSuchIdException,
+//            NoCarWithSuchIdException, IncorrectRentTimeException {
+//        //2023-04-12T23:00:10
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+//        LocalDateTime dateFrom = LocalDateTime.parse(from, formatter);
+//        LocalDateTime dateTo = LocalDateTime.parse(to, formatter);
+//        BigDecimal orderSum = BigDecimal.valueOf(15000);
+//
+//        orderService.orderCar(1, 3, dateFrom, dateTo, orderSum);
+//    }
 
 
 

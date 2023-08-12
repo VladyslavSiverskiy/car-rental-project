@@ -4,9 +4,9 @@ import com.vsiver.spring.car_rent_project.entities.Car;
 import com.vsiver.spring.car_rent_project.entities.EOrderState;
 import com.vsiver.spring.car_rent_project.entities.Order;
 import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
+import com.vsiver.spring.car_rent_project.exceptions.NoOrderWithSuchIdException;
 import com.vsiver.spring.car_rent_project.repositories.CarRepository;
 import com.vsiver.spring.car_rent_project.repositories.OrderRepository;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Component;
@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 
 @Component
@@ -34,15 +35,11 @@ public class CarReservationService {
     }
 
     @Transactional
-    public void updateCarState(Integer carId, Long orderId) throws NoCarWithSuchIdException {
-        Car car = carRepository.findById(carId).orElseThrow(() -> new NoCarWithSuchIdException("Can`t find such car"));
+    void updateCarState(Car car, Order order) throws NoCarWithSuchIdException {
         car.setInStock(false);
-        Order order = orderRepository.findById(orderId).get();
-        order.setOrderState(EOrderState.IN_PROCESS);
         carRepository.save(car);
         orderRepository.save(order);
         System.out.println("Saved");
-
     }
 
 
@@ -50,12 +47,13 @@ public class CarReservationService {
      * Method, which schedules changing of the order state (from IS_RESERVED to IN_PROCESS)
      *
      * @param reserveFromTime - date, when schedule make set order state IN_PROCESS
-     * @param carId - car, where value of availableTo and available will be changed
-     * @param orderId - order to manipulate
+     * @param car - car, where value of availableTo and available will be changed
+     * @param order - order to manipulate
      */
-    public void changeCarStateInProcess(LocalDateTime reserveFromTime, Integer carId, Long orderId) {
+    public void changeCarStateBeforeInProcess(LocalDateTime reserveFromTime, Car car, Order order) {
+        //за 5 годин до початку оренди метод робить машину не доступною
         Instant instant = reserveFromTime.minusHours(5).atZone(ZoneId.systemDefault()).toInstant();
-        System.out.println("Reserved car with id " + carId + ", order id " + orderId);
+        System.out.println("Reserved car with id " + car.getCarId() + ", order id " + order.getId());
         System.out.println(instant);
         if (scheduledTask != null) {
             scheduledTask.cancel(false);
@@ -63,9 +61,9 @@ public class CarReservationService {
         }
         scheduledTask = scheduler.schedule(() -> {
             // Reserve car here
-            System.out.println("Schedule task, car id is " + carId + " . Time is " + new Date());
+            System.out.println("Schedule task, car id is " + car.getCarId() + " . Time is " + new Date());
             try {
-                updateCarState(carId, orderId);
+                updateCarState(car, order);
             } catch (NoCarWithSuchIdException e) {
                 throw new RuntimeException(e.getMessage());
             }
@@ -85,5 +83,54 @@ public class CarReservationService {
                 //TODO:sent notification on email;
             }
         }, instant);
+    }
+
+    public void setTimeOfPaymentChecking(LocalDateTime rentFrom, Car car, Order order) {
+        System.out.println(rentFrom);
+        Instant instant = rentFrom.atZone(ZoneId.systemDefault()).toInstant();
+        System.out.println(instant);
+        if (scheduledTask != null) {
+            scheduledTask.cancel(false);
+            System.out.println("Scheduled payment checking time: " + scheduledTask);
+        }
+        scheduledTask = scheduler.schedule(() -> {
+            System.out.println(order);
+            System.out.println(car);
+            checkIfOrderIsPayed(order, car);
+        }, instant);
+    }
+
+    private void checkIfOrderIsPayed(Order order, Car car){
+        if(order.isPayed()){
+            System.out.println("Setting in process");
+            setOrderInProcess(order);
+        }else{
+            System.out.println("Setting expired");
+            closeOrder(order,car);
+        }
+    }
+
+
+    /** When user paid before rentTo time
+     *
+     * @param order
+     */
+    private void setOrderInProcess(Order order){
+        order.setOrderState(EOrderState.IN_PROCESS);
+        //TODO: sent that order is active
+        orderRepository.save(order);
+    }
+
+    /**
+     * Order is closed only if manager finished it, or payment was expired
+     */
+    private void closeOrder(Order order, Car car){
+        order.setOrderState(EOrderState.EXPIRED);
+        order.setPaymentReference("");
+        car.setInStock(true);
+        car.setAvailableTo(null);
+        orderRepository.save(order);
+        carRepository.save(car);
+        //TODO:sent notification on email
     }
 }

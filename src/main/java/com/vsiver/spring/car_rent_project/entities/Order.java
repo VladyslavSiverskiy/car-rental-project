@@ -140,11 +140,28 @@ public class Order {
         this.orderSum = orderSum;
     }
 
-    public Boolean getPayed() {
+    public Boolean isPayed() {
         return isPayed;
     }
 
     public void setPayed(Boolean payed) {
         isPayed = payed;
+    }
+
+    @Override
+    public String toString() {
+        return "Order{" +
+               "id=" + id +
+               ", user=" + user.getId() +
+               ", car=" + car.getCarId() +
+               ", orderState=" + orderState +
+               ", rentFrom=" + rentFrom +
+               ", rentTo=" + rentTo +
+               ", orderSum=" + orderSum +
+               ", paymentReference='" + paymentReference + '\'' +
+               ", payPalOrderId='" + payPalOrderId + '\'' +
+               ", creationTime=" + creationTime +
+               ", isPayed=" + isPayed +
+               '}';
     }
 }

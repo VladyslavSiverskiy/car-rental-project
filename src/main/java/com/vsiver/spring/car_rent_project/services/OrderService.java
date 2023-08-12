@@ -1,6 +1,5 @@
 package com.vsiver.spring.car_rent_project.services;
 
-import com.vsiver.spring.car_rent_project.dtos.OrderDto;
 import com.vsiver.spring.car_rent_project.entities.Car;
 import com.vsiver.spring.car_rent_project.entities.EOrderState;
 import com.vsiver.spring.car_rent_project.entities.Order;
@@ -9,16 +8,13 @@ import com.vsiver.spring.car_rent_project.repositories.CarRepository;
 import com.vsiver.spring.car_rent_project.repositories.OrderRepository;
 import com.vsiver.spring.car_rent_project.user.User;
 import com.vsiver.spring.car_rent_project.user.UserRepository;
-import com.vsiver.spring.car_rent_project.utils.CustomMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Transactional
 @Service
@@ -34,41 +30,6 @@ public class OrderService {
     @Autowired
     private CarReservationService carReservationService;
 
-    public boolean orderCar(Integer carId, Integer userId, LocalDateTime rentFrom, LocalDateTime rentTo, BigDecimal orderSum) throws NoCarWithSuchIdException, NoUserWithSuchIdException, CarOutOfStockException, IncorrectRentTimeException {
-        //TODO: set to car when it will be able
-        Car car = carRepository.findById(carId).orElseThrow(() -> new NoCarWithSuchIdException("No car with such id!"));
-        User user = userRepository.findById(userId).orElseThrow(() -> new NoUserWithSuchIdException("No user with such id!"));
-        if (!car.getInStock()) {
-            throw new CarOutOfStockException("Car with such id is unavailable");
-        }
-        if (rentFrom.compareTo(rentTo) >= 0) {
-            throw new IncorrectRentTimeException("Rent end time can`t be faster than rent beginning time");
-        }
-        int res = rentFrom.compareTo(LocalDateTime.now().plusHours(5)); // - 1 менше - значить IN_PROCESS
-        Order order = new Order();
-        if (res != 1) {
-            car.setInStock(false);
-            order.setOrderState(EOrderState.IN_PROCESS);
-            //змінити InStock на true після завершення
-        } else {//резервування
-            car.setAvailableTo(rentFrom);
-            order.setOrderState(EOrderState.IS_RESERVED);
-
-            //змінити дані в момент 5 год
-        }
-        order.setRentFrom(rentFrom);
-        order.setRentTo(rentTo);
-        order.setUser(user);
-        order.setCar(car);
-        order.setOrderSum(orderSum);
-        orderRepository.save(order);
-
-        if (res == 1) {
-            carReservationService.changeCarStateInProcess(rentFrom, car.getCarId(), order.getId());
-        }
-        carReservationService.setExpiredOrderStatusIfTimeLast(rentTo, order.getId());
-        return false;
-    }
 
     /**
      * Admin send request when customer will return car to parking location and order status in database is changed
@@ -116,21 +77,6 @@ public class OrderService {
             throw new IncorrectRentTimeException("Rent end time can`t be faster than rent beginning time");
         }
 
-        int res = rentFrom.compareTo(LocalDateTime.now().plusHours(5)); // - 1 менше - значить IN_PROCESS
-        if (res != 1) {
-            car.setInStock(false);
-            order.setOrderState(EOrderState.IS_RESERVED);
-//            order.setOrderState(EOrderState.IN_PROCESS);//TODO: зробити коли настав час замовлення та оплата здійснена, якщо ні то скинути повідомлення на пошту
-            //змінити InStock на true після завершення
-        } else {//резервування
-            car.setAvailableTo(rentFrom);
-            //змінити дані в момент 5 год
-            carReservationService.changeCarStateInProcess(rentFrom, car.getCarId(), order.getId());
-        }
-        //TODO: якщо оплата не поступила до rentTo (подивитись метод, змінити його)
-        carReservationService.setExpiredOrderStatusIfTimeLast(rentTo, order.getId());
-
-
         order.setCar(car);
         order.setUser(user);
         order.setRentFrom(rentFrom);
@@ -141,9 +87,31 @@ public class OrderService {
         order.setPayPalOrderId(paymentOrderId);
         order.setPaymentReference(paymentLink);
         order.setPayed(false);
+
         order = orderRepository.save(order);
-        carRepository.save(car);
+
+        int res = rentFrom.compareTo(LocalDateTime.now().plusHours(5)); // - 1 менше - значить IN_PROCESS
+        if (res != 1) {
+            System.out.println("Reserving now");
+            car.setInStock(false);
+//            order.setOrderState(EOrderState.IN_PROCESS);//TODO: зробити коли настав час замовлення та оплата здійснена, якщо ні то скинути повідомлення на пошту
+            //змінити InStock на true після завершення
+        } else {//резервування
+            System.out.println("reserving later");
+            car.setAvailableTo(rentFrom);
+            //заблокувати машину дані в момент 5 год
+            //зробить update
+            carReservationService.changeCarStateBeforeInProcess(rentFrom, car, order);
+            //на rent to запланувати перевірку isPayed (якщо оплачено - зробити in process, якщо ні - закрити замовлення і кинути на пошту лист)
+            //TODO: якщо оплата не поступила до rentTo (подивитись метод, змінити його)
+        }
+        System.out.println("Will be changed");
         System.out.println(order);
+        System.out.println(car);
+        carReservationService.setTimeOfPaymentChecking(rentFrom, car, order);
+
+        System.out.println(order);
+        carRepository.save(car);
         return order;
     }
 
