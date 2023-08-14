@@ -3,10 +3,12 @@ package com.vsiver.spring.car_rent_project.controllers;
 
 import com.vsiver.spring.car_rent_project.dtos.CarDto;
 import com.vsiver.spring.car_rent_project.dtos.InfoMessage;
+import com.vsiver.spring.car_rent_project.dtos.OrderDto;
 import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
 import com.vsiver.spring.car_rent_project.services.S3Service;
 import com.vsiver.spring.car_rent_project.services.CarService;
 import com.vsiver.spring.car_rent_project.services.OrderService;
+import com.vsiver.spring.car_rent_project.utils.CustomMappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 //@CrossOrigin(origins = "http://localhost:3000")
@@ -68,10 +73,24 @@ public class AdminController {
         return ResponseEntity.ok(infoMessage);
     }
 
+    @GetMapping("/orders")
+    public ResponseEntity<List<OrderDto>> retrieveAllOrders(){
+        return ResponseEntity.ok(orderService.getAllOrders()
+                .stream()
+                .map(CustomMappers::mapOrderToOrderDto)
+                .sorted(descOrderDateComparator())
+                .collect(Collectors.toList())
+        );
+    }
+
+    private Comparator<OrderDto> descOrderDateComparator(){
+        return Comparator.comparing(OrderDto::getCreationTime);
+    }
+
     /**
      * Submit order (car was returned)
      */
-    @PostMapping("/orders/{orderId}")
+    @GetMapping("/orders/submit/{orderId}")
     public ResponseEntity<InfoMessage> submitOrder(@PathVariable Long orderId) throws NoCarWithSuchIdException {
         orderService.submitOrder(orderId);
         InfoMessage infoMessage = new InfoMessage();

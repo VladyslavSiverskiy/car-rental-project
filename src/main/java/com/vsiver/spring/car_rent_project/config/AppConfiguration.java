@@ -3,9 +3,11 @@ package com.vsiver.spring.car_rent_project.config;
 
 import com.vsiver.spring.car_rent_project.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -22,6 +24,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class AppConfiguration {
 
+    private final Logger logger = LoggerFactory.getLogger(AppConfiguration.class);
     private final UserRepository userRepository;
 
     //auth
@@ -55,8 +58,8 @@ public class AppConfiguration {
     public WebMvcConfigurer webMvcConfigurer(){
         return new WebMvcConfigurer() {
             @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                System.out.println("Set cors");
+            public void addCorsMappings(@NonNull CorsRegistry registry) {
+                logger.info("Set cors");
                 registry.addMapping("/**")
                         .allowedHeaders("*")
                         .allowedMethods("*")

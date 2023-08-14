@@ -31,5 +31,5 @@ public class OrderDto {
     private String paymentReference;
     private String payPalOrderId;
     private LocalDateTime creationTime;
-    private Boolean isPayed; //here save PayPal status
+    private Boolean isPayed;
 }

@@ -1,32 +1,28 @@
 package com.vsiver.spring.car_rent_project.controllers;
 
 import com.vsiver.spring.car_rent_project.config.JwtService;
-import com.vsiver.spring.car_rent_project.dtos.*;
-import com.vsiver.spring.car_rent_project.entities.Like;
-import com.vsiver.spring.car_rent_project.entities.Order;
+import com.vsiver.spring.car_rent_project.dtos.CreatedOrderDto;
+import com.vsiver.spring.car_rent_project.dtos.OrderDto;
+import com.vsiver.spring.car_rent_project.dtos.RequestOrderDto;
+import com.vsiver.spring.car_rent_project.dtos.UserDto;
 import com.vsiver.spring.car_rent_project.exceptions.CarOutOfStockException;
 import com.vsiver.spring.car_rent_project.exceptions.IncorrectRentTimeException;
 import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
 import com.vsiver.spring.car_rent_project.exceptions.NoUserWithSuchIdException;
-import com.vsiver.spring.car_rent_project.services.LikeService;
-import com.vsiver.spring.car_rent_project.services.OrderService;
-import com.vsiver.spring.car_rent_project.services.PaymentService;
-import com.vsiver.spring.car_rent_project.services.UserService;
+import com.vsiver.spring.car_rent_project.services.*;
 import com.vsiver.spring.car_rent_project.user.User;
 import com.vsiver.spring.car_rent_project.utils.CustomMappers;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -35,7 +31,7 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @RequestMapping("api/v1/user")
 public class UserController {
-
+    private S3Service s3Service;
     private OrderService orderService;
     private PaymentService paymentService;
     private JwtService jwtService;
@@ -50,6 +46,7 @@ public class UserController {
                 .email(user.getEmail())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .phoneNumber(user.getPhoneNumber())
                 .build();
         return ResponseEntity.ok(userDto);
     }
@@ -132,23 +129,8 @@ public class UserController {
     }
 
 
-    /** Submit PayPal order
-     * @param token
-     * @return
-     */
-    @GetMapping("/orders/capture")
-    public RedirectView captureOrder(@RequestParam String token) {
-        //FIXME(Never Do this either put it in proper scope or in DB)
 
-        //тут шлях на зміну isPayed
-        String orderId = token;
-        System.out.println(orderId);
-        orderService.getOrderByPaymentServiceId(orderId);
-        paymentService.captureOrder(token);
-        return new RedirectView("http://localhost:3000/");
-    }
-
-    /** returns list of orders by passed userId
+    /** returns list of orders of User by passing userId
      * @param userId
      * @return
      */
@@ -162,6 +144,19 @@ public class UserController {
         );
     }
 
+    @PostMapping(value = "/profile/avatar/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Boolean> uploadCarPicture(
+            @RequestParam("file") MultipartFile file,
+            @PathVariable Integer userId
+    ) throws IOException {
+        s3Service.putObject(
+                "car-app-bucket",
+                "users/user" + userId + "/avatar.jpg",
+                file.getBytes()
+        );
+        return ResponseEntity.ok(true);
+    }
+
     private URI buildReturnUrl(HttpServletRequest request) {
         try {
             URI requestUri = URI.create(request.getRequestURL().toString());
@@ -169,7 +164,7 @@ public class UserController {
                     requestUri.getUserInfo(),
                     requestUri.getHost(),
                     requestUri.getPort(),
-                    "/api/v1/user/orders/capture",
+                    "/api/v1/public/orders/capture",
                     null, null);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);

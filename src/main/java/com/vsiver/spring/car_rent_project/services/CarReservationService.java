@@ -4,26 +4,33 @@ import com.vsiver.spring.car_rent_project.entities.Car;
 import com.vsiver.spring.car_rent_project.entities.EOrderState;
 import com.vsiver.spring.car_rent_project.entities.Order;
 import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
-import com.vsiver.spring.car_rent_project.exceptions.NoOrderWithSuchIdException;
 import com.vsiver.spring.car_rent_project.repositories.CarRepository;
 import com.vsiver.spring.car_rent_project.repositories.OrderRepository;
+import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.SchedulingException;
 import org.springframework.scheduling.TaskScheduler;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ScheduledFuture;
 
-@Component
+@Service
+@AllArgsConstructor
+@Transactional
 public class CarReservationService {
 
+    private Logger logger = LoggerFactory.getLogger(CarReservationService.class);
     private TaskScheduler scheduler;
-    private ScheduledFuture<?> scheduledTask;
+    private List<ScheduledFuture<?>> scheduledTasks = new ArrayList<>();
     private CarRepository carRepository;
     private OrderRepository orderRepository;
 
@@ -39,9 +46,7 @@ public class CarReservationService {
         car.setInStock(false);
         carRepository.save(car);
         orderRepository.save(order);
-        System.out.println("Saved");
     }
-
 
     /**
      * Method, which schedules changing of the order state (from IS_RESERVED to IN_PROCESS)
@@ -55,57 +60,54 @@ public class CarReservationService {
         Instant instant = reserveFromTime.minusHours(5).atZone(ZoneId.systemDefault()).toInstant();
         System.out.println("Reserved car with id " + car.getCarId() + ", order id " + order.getId());
         System.out.println(instant);
-        if (scheduledTask != null) {
-            scheduledTask.cancel(false);
-            System.out.println("scheduled task " + scheduledTask);
-        }
-        scheduledTask = scheduler.schedule(() -> {
+
+        ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> {
             // Reserve car here
-            System.out.println("Schedule task, car id is " + car.getCarId() + " . Time is " + new Date());
+            logger.info("Schedule task, car id is " + car.getCarId() + " . Car will be updated at " + instant);
             try {
                 updateCarState(car, order);
             } catch (NoCarWithSuchIdException e) {
-                throw new RuntimeException(e.getMessage());
+                logger.error("Scheduling exception: " + e.getMessage());
+                throw new SchedulingException(e.getMessage());
             }
         }, instant);
+
+        scheduledTasks.add(scheduledTask);
     }
 
-    public void setExpiredOrderStatusIfTimeLast(LocalDateTime reserveToTime, Long orderId) {
+    public void setExpiredOrderStatusIfTimeLast(LocalDateTime reserveToTime, Order order) {
+        if(Objects.isNull(order)) throw new IllegalArgumentException("Object can`t be null");
         Instant instant = reserveToTime.atZone(ZoneId.systemDefault()).toInstant();
-        if (scheduledTask != null) {
-            scheduledTask.cancel(false);
-            System.out.println("scheduled task " + scheduledTask);
-        }
-        scheduledTask = scheduler.schedule(() -> {
-            Order order = orderRepository.findById(orderId).get();
+        ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> {
+            System.out.println("Check order");
             if (!order.getOrderState().equals(EOrderState.FINISHED)) {
-                order.setOrderState(EOrderState.EXPIRED);
+                logger.warn("Order with id " + order.getId() + " is overdue!");
+                order.setPayed(true);
+                order.setOrderState(EOrderState.OVERDUE);
+                orderRepository.save(order);
                 //TODO:sent notification on email;
             }
         }, instant);
+        scheduledTasks.add(scheduledTask);
     }
 
     public void setTimeOfPaymentChecking(LocalDateTime rentFrom, Car car, Order order) {
-        System.out.println(rentFrom);
         Instant instant = rentFrom.atZone(ZoneId.systemDefault()).toInstant();
-        System.out.println(instant);
-        if (scheduledTask != null) {
-            scheduledTask.cancel(false);
-            System.out.println("Scheduled payment checking time: " + scheduledTask);
-        }
-        scheduledTask = scheduler.schedule(() -> {
-            System.out.println(order);
-            System.out.println(car);
+        logger.info("Scheduled payment checking time: " + instant
+                    + ", for car with id " + car.getCarId());
+        ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> {
             checkIfOrderIsPayed(order, car);
         }, instant);
+        scheduledTasks.add(scheduledTask);
     }
 
     private void checkIfOrderIsPayed(Order order, Car car){
+        order = orderRepository.findById(order.getId()).get();
         if(order.isPayed()){
-            System.out.println("Setting in process");
+            logger.info("Car with id " + car.getCarId() + " set IN_PROCESS status");
             setOrderInProcess(order);
         }else{
-            System.out.println("Setting expired");
+            logger.info("Car with id " + car.getCarId() + " set EXPIRED status");
             closeOrder(order,car);
         }
     }
@@ -117,8 +119,10 @@ public class CarReservationService {
      */
     private void setOrderInProcess(Order order){
         order.setOrderState(EOrderState.IN_PROCESS);
+        order.setPayed(true);
         //TODO: sent that order is active
         orderRepository.save(order);
+        orderRepository.flush();
     }
 
     /**
@@ -131,6 +135,7 @@ public class CarReservationService {
         car.setAvailableTo(null);
         orderRepository.save(order);
         carRepository.save(car);
+        orderRepository.flush();
         //TODO:sent notification on email
     }
 }

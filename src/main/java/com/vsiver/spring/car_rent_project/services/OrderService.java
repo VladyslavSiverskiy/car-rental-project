@@ -8,6 +8,10 @@ import com.vsiver.spring.car_rent_project.repositories.CarRepository;
 import com.vsiver.spring.car_rent_project.repositories.OrderRepository;
 import com.vsiver.spring.car_rent_project.user.User;
 import com.vsiver.spring.car_rent_project.user.UserRepository;
+import lombok.AllArgsConstructor;
+import org.aspectj.weaver.ast.Or;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,20 +20,24 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Transactional
 @Service
+@Transactional
 public class OrderService {
 
-    @Autowired
     private OrderRepository orderRepository;
-    @Autowired
     private CarRepository carRepository;
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
     private CarReservationService carReservationService;
 
+    private Logger logger = LoggerFactory.getLogger(OrderService.class);
+
+    @Autowired
+    public OrderService(OrderRepository orderRepository, CarRepository carRepository, UserRepository userRepository, CarReservationService carReservationService) {
+        this.orderRepository = orderRepository;
+        this.carRepository = carRepository;
+        this.userRepository = userRepository;
+        this.carReservationService = carReservationService;
+    }
 
     /**
      * Admin send request when customer will return car to parking location and order status in database is changed
@@ -39,11 +47,12 @@ public class OrderService {
         order.setOrderState(EOrderState.FINISHED);
         Car car = carRepository.findById(order.getCar().getCarId()).orElseThrow(()->new NoCarWithSuchIdException("No car with such id"));
         car.setInStock(true);
+        //TODO: глянути в order, чи є машина ще зарезрвована
+//        car.setAvailableTo();
         carRepository.save(car);
         orderRepository.save(order);
         return true;
     }
-
 
     /**
      * Method which create order for car rent (there is also Order class from PayPal in application
@@ -92,12 +101,10 @@ public class OrderService {
 
         int res = rentFrom.compareTo(LocalDateTime.now().plusHours(5)); // - 1 менше - значить IN_PROCESS
         if (res != 1) {
-            System.out.println("Reserving now");
             car.setInStock(false);
 //            order.setOrderState(EOrderState.IN_PROCESS);//TODO: зробити коли настав час замовлення та оплата здійснена, якщо ні то скинути повідомлення на пошту
             //змінити InStock на true після завершення
         } else {//резервування
-            System.out.println("reserving later");
             car.setAvailableTo(rentFrom);
             //заблокувати машину дані в момент 5 год
             //зробить update
@@ -105,22 +112,11 @@ public class OrderService {
             //на rent to запланувати перевірку isPayed (якщо оплачено - зробити in process, якщо ні - закрити замовлення і кинути на пошту лист)
             //TODO: якщо оплата не поступила до rentTo (подивитись метод, змінити його)
         }
-        System.out.println("Will be changed");
-        System.out.println(order);
-        System.out.println(car);
         carReservationService.setTimeOfPaymentChecking(rentFrom, car, order);
+        carReservationService.setExpiredOrderStatusIfTimeLast(rentTo, order);
 
-        System.out.println(order);
         carRepository.save(car);
         return order;
-    }
-
-    /** change selected order state to IS_RESERVED or IN_ACTION, set payed to yes
-     * @param order
-     * @return
-     */
-    public Order changeOrderStateToReserved(Order order){
-        return null;
     }
 
     public List<Order> getOrdersByUserId(Integer userId){
@@ -130,4 +126,18 @@ public class OrderService {
     public Order getOrderByPaymentServiceId(String paymentServiceId){
         return orderRepository.findByPayPalOrderId(paymentServiceId);
     }
+
+    /**
+     * Set isPayed status on true
+     */
+    public void approvePayment(Order order) {
+        order.setPayed(true);
+        orderRepository.save(order);
+        orderRepository.flush();
+    }
+
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
 }
+
