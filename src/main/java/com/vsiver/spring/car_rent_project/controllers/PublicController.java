@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -40,11 +41,15 @@ public class PublicController {
 
     @GetMapping("/profile/{userId}/avatar")
     public String downloadAvatar(@PathVariable Integer userId) throws IOException {
-        var resp = s3Service.downloadObject(
-                "car-app-bucket",
-                "users/user" + userId + "/avatar.jpg"
-        );
-        if(resp == null) return null;
+        byte[] resp;
+        try {
+            resp = s3Service.downloadObject(
+                    "car-app-bucket",
+                    "users/user" + userId + "/avatar.jpg"
+            );
+        }catch (NoSuchKeyException e){
+            return null;
+        }
         return Base64.getEncoder().encodeToString(resp);
     }
 

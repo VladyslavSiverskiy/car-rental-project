@@ -57,7 +57,6 @@ public class Car {
     @Column(name = "in_stock")
     private Boolean inStock;
 
-    @CreationTimestamp
     @Column(name = "available_to")
     private LocalDateTime availableTo;
 

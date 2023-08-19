@@ -1,6 +1,7 @@
 package com.vsiver.spring.car_rent_project.dtos;
 
 import com.vsiver.spring.car_rent_project.entities.Car;
+import com.vsiver.spring.car_rent_project.utils.CustomMappers;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -51,13 +52,7 @@ public class CarDto {
 
         if (car.getCarReviews() != null) {
             List<ReviewDto> reviewDto = car.getCarReviews().stream()
-                    .map(review -> new ReviewDto(
-                            review.getId(),
-                            review.getUser().getFirstName(),
-                            review.getUser().getLastName(),
-                            review.getDescription(),
-                            review.getRate()
-                    ))
+                    .map(CustomMappers::mapReviewToReviewDto)
                     .collect(Collectors.toList());
             builder.reviews(reviewDto);
         }

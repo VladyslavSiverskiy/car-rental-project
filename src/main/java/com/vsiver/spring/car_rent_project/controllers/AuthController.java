@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 @RestController
 
@@ -36,7 +37,7 @@ public class AuthController {
     @PostMapping("/signup")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest registerRequest) throws NoCarWithSuchIdException {
 
-        var user = User.builder()
+        User user = User.builder()
                 .firstName(registerRequest.getFirstname())
                 .lastName(registerRequest.getLastname())
                 .email(registerRequest.getEmail())
@@ -44,6 +45,7 @@ public class AuthController {
                 .phoneNumber(registerRequest.getPhoneNumber())
                 .role(Role.ADMIN)
                 .build();
+        System.out.println(user);
         if (!userRepository.findByEmail(user.getEmail()).isPresent()) {
             userRepository.save(user);
         } else {
@@ -65,14 +67,10 @@ public class AuthController {
                         authenticationRequest.getPassword()
                 )
         );
-
         User user = userRepository
                 .findByEmail(authenticationRequest.getEmail())
                 .get();
-        System.out.println(user);
-
-        var jwtToken = jwtService.generateToken(user);
-        System.out.println(jwtToken);
+        String jwtToken = jwtService.generateToken(user);
         return ResponseEntity.ok(AuthenticationResponse.builder().jwt(jwtToken).build());
     }
 }

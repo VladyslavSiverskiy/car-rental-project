@@ -3,6 +3,8 @@ package com.vsiver.spring.car_rent_project.entities;
 import com.vsiver.spring.car_rent_project.user.User;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "reviews")
 public class Review {
@@ -25,6 +27,9 @@ public class Review {
 
     @Column(name = "rate")
     private Double rate;
+
+    @Column(name = "creation_time")
+    private LocalDateTime creationDate;
 
     public Review() {
     }
@@ -73,5 +78,15 @@ public class Review {
     public void setRate(Double rate) {
         this.rate = rate;
     }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+
+
 }
 

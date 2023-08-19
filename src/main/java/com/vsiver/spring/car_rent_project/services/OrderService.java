@@ -112,6 +112,7 @@ public class OrderService {
             //на rent to запланувати перевірку isPayed (якщо оплачено - зробити in process, якщо ні - закрити замовлення і кинути на пошту лист)
             //TODO: якщо оплата не поступила до rentTo (подивитись метод, змінити його)
         }
+        System.out.println(order);
         carReservationService.setTimeOfPaymentChecking(rentFrom, car, order);
         carReservationService.setExpiredOrderStatusIfTimeLast(rentTo, order);
 

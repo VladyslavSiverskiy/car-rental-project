@@ -1,21 +1,23 @@
 package com.vsiver.spring.car_rent_project.controllers;
 
 import com.vsiver.spring.car_rent_project.config.JwtService;
-import com.vsiver.spring.car_rent_project.dtos.CreatedOrderDto;
-import com.vsiver.spring.car_rent_project.dtos.OrderDto;
-import com.vsiver.spring.car_rent_project.dtos.RequestOrderDto;
-import com.vsiver.spring.car_rent_project.dtos.UserDto;
+import com.vsiver.spring.car_rent_project.dtos.*;
+import com.vsiver.spring.car_rent_project.entities.Review;
 import com.vsiver.spring.car_rent_project.exceptions.CarOutOfStockException;
 import com.vsiver.spring.car_rent_project.exceptions.IncorrectRentTimeException;
 import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
 import com.vsiver.spring.car_rent_project.exceptions.NoUserWithSuchIdException;
 import com.vsiver.spring.car_rent_project.services.*;
+import com.vsiver.spring.car_rent_project.services.implementations.UserServiceImplementation;
 import com.vsiver.spring.car_rent_project.user.User;
 import com.vsiver.spring.car_rent_project.utils.CustomMappers;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,6 +25,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -35,20 +38,52 @@ public class UserController {
     private OrderService orderService;
     private PaymentService paymentService;
     private JwtService jwtService;
-    private UserService userService;
+    private UserServiceImplementation userService;
+    private CarService carService;
     private LikeService likeService;
+    private ReviewService reviewService;
+    private final AuthenticationManager authenticationManager;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final CustomMappers customMappers;
 
     @PostMapping("/data")
     public ResponseEntity<UserDto> getUserDataByJwtToken(@RequestBody String jwtToken) {
         User user = userService.getUserByEmail(jwtService.extractUsername(jwtToken));
-        UserDto userDto = UserDto.builder()
-                .id(user.getId())
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .phoneNumber(user.getPhoneNumber())
-                .build();
+        UserDto userDto = CustomMappers.mapUserToUserDto(user);
         return ResponseEntity.ok(userDto);
+    }
+
+    @GetMapping("/data/{userId}")
+    public ResponseEntity<UserDto> getUserDataById(@PathVariable Integer userId) {
+        User user = userService.readUserById(userId);
+        return ResponseEntity.ok(CustomMappers.mapUserToUserDto(user));
+    }
+
+    @PostMapping("/password/update")
+    public ResponseEntity<Boolean> updateUserPassword(@RequestBody UpdatePasswordDto updatePasswordDto) {
+        User user = userService.readUserById(updatePasswordDto.getUserId());
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        user.getEmail(),
+                        updatePasswordDto.getOldPassword()
+                )
+        );
+        user.setPass(passwordEncoder.encode(updatePasswordDto.getNewPassword()));
+        userService.updateUser(CustomMappers.mapUserToUserDto(user));
+        return ResponseEntity.ok(true);
+    }
+
+    @PostMapping("/review")
+    public ResponseEntity<ReviewDto> postComment(@RequestBody ReviewDto reviewDto) throws NoUserWithSuchIdException, NoCarWithSuchIdException {
+        reviewDto.setCreationDate(LocalDateTime.now());
+        Review review = reviewService.create(
+                CustomMappers.mapReviewDtoToReview(
+                        reviewDto,
+                        customMappers.mapCarDtoToCar(carService.findById(reviewDto.getCarId())),
+                        userService.readUserById(reviewDto.getUserId()))
+        );
+
+        return ResponseEntity.ok(CustomMappers.mapReviewToReviewDto(review));
     }
 
     /**
@@ -69,7 +104,7 @@ public class UserController {
 
     /**
      * @param userId - id of user, who wants to remove like
-     * @param carId - car, where like should be removed
+     * @param carId  - car, where like should be removed
      * @return
      */
     @GetMapping("{userId}/like-car/{carId}/delete")
@@ -98,7 +133,9 @@ public class UserController {
         );
     }
 
-    /** Create PayPal order
+    /**
+     * Create PayPal order
+     *
      * @param requestOrder
      * @param request
      * @return
@@ -129,19 +166,31 @@ public class UserController {
     }
 
 
-
-    /** returns list of orders of User by passing userId
+    /**
+     * returns list of orders of User by passing userId
+     *
      * @param userId
      * @return
      */
     @GetMapping("/orders/all/{userId}")
     public ResponseEntity<List<OrderDto>> retrieveOrders(@PathVariable Integer userId) {
-         return ResponseEntity.ok(
+        return ResponseEntity.ok(
                 orderService.getOrdersByUserId(userId)
                         .stream()
                         .map(CustomMappers::mapOrderToOrderDto)
                         .collect(Collectors.toList())
         );
+    }
+
+    //TODO:USER update, then do emails.
+    @PostMapping("/profile/update")
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) {
+        System.out.println(userDto);
+        User user = userService.updateUser(userDto);
+        System.out.println(user);
+        userDto = CustomMappers.mapUserToUserDto(user);
+        System.out.println(userDto);
+        return ResponseEntity.ok(userDto);
     }
 
     @PostMapping(value = "/profile/avatar/{userId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)

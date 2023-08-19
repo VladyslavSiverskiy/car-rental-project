@@ -71,7 +71,7 @@ public class CarReservationService {
                 throw new SchedulingException(e.getMessage());
             }
         }, instant);
-
+        System.out.println(scheduledTask);
         scheduledTasks.add(scheduledTask);
     }
 
@@ -88,6 +88,8 @@ public class CarReservationService {
                 //TODO:sent notification on email;
             }
         }, instant);
+
+        System.out.println(scheduledTask);
         scheduledTasks.add(scheduledTask);
     }
 
@@ -98,11 +100,15 @@ public class CarReservationService {
         ScheduledFuture<?> scheduledTask = scheduler.schedule(() -> {
             checkIfOrderIsPayed(order, car);
         }, instant);
+
+        System.out.println(scheduledTask);
         scheduledTasks.add(scheduledTask);
     }
 
     private void checkIfOrderIsPayed(Order order, Car car){
+        System.out.println(order);
         order = orderRepository.findById(order.getId()).get();
+        System.out.println(" HEEEREEEE " + order);
         if(order.isPayed()){
             logger.info("Car with id " + car.getCarId() + " set IN_PROCESS status");
             setOrderInProcess(order);
