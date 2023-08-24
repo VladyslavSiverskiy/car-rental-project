@@ -42,6 +42,7 @@ public class UserController {
     private CarService carService;
     private LikeService likeService;
     private ReviewService reviewService;
+    private EmailService emailService;
     private final AuthenticationManager authenticationManager;
     private final BCryptPasswordEncoder passwordEncoder;
     private final CustomMappers customMappers;
@@ -117,7 +118,6 @@ public class UserController {
                 .toList());
     }
 
-
     /**
      * Method, which returns list of car ID's, which user previously liked
      *
@@ -182,14 +182,12 @@ public class UserController {
         );
     }
 
-    //TODO:USER update, then do emails.
     @PostMapping("/profile/update")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) {
-        System.out.println(userDto);
         User user = userService.updateUser(userDto);
-        System.out.println(user);
         userDto = CustomMappers.mapUserToUserDto(user);
-        System.out.println(userDto);
+        emailService.sendEmail(userDto.getEmail(), "Your profile was updated",
+                "Dear " + userDto.getFirstName() + ", your profile was updated at " + LocalDateTime.now());
         return ResponseEntity.ok(userDto);
     }
 

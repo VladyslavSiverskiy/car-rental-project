@@ -25,6 +25,7 @@ class LikeServiceTest {
     LikeRepository likeRepository;
     @Autowired
     LikeService likeService;
+
     @Autowired
     ApplicationContext context;
 

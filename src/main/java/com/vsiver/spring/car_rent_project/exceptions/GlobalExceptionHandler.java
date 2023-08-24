@@ -11,49 +11,53 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler
+    @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<InfoMessage> handleException(ExpiredJwtException exception){
-        InfoMessage data = new InfoMessage();
-        data.setInfo(exception.getMessage());
-        return new ResponseEntity<>(data, HttpStatus.UNAUTHORIZED);
+        return responseFormatter(exception, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(MalformedJwtException.class)
     public ResponseEntity<InfoMessage> handleException(MalformedJwtException exception){
-        InfoMessage data = new InfoMessage();
-        data.setInfo(exception.getMessage());
-        return new ResponseEntity<>(data, HttpStatus.UNAUTHORIZED);
+       return responseFormatter(exception, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<InfoMessage> handleException(NoCarWithSuchIdException exception){
-        InfoMessage data = new InfoMessage();
-        data.setInfo(exception.getMessage());
-        return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler({
+            NoCarWithSuchIdException.class,
+            NoReviewWithSuchIdException.class,
+            NoSuchUserException.class,
+            NoUserWithSuchIdException.class,
+            NoCarWithSuchIdException.class,
+            NoOrderWithSuchIdException.class
+    })
+    public ResponseEntity<InfoMessage> handleIdNotFoundException(Exception exception){
+        return responseFormatter(exception, HttpStatus.NOT_FOUND);
+    }
+    @ExceptionHandler({
+            CarOutOfStockException.class,
+            IncorrectRentTimeException.class
+    })
+    public ResponseEntity<InfoMessage> handleIdBadRequestException(Exception exception){
+        return responseFormatter(exception, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler
     public ResponseEntity<InfoMessage> handleException(BadCredentialsException exception){
-        InfoMessage data = new InfoMessage();
-        exception.printStackTrace();
-        data.setInfo(exception.toString());
-        return new ResponseEntity<>(data, HttpStatus.INTERNAL_SERVER_ERROR);
+        return responseFormatter(exception, HttpStatus.UNAUTHORIZED);
     }
+
     @ExceptionHandler
     public ResponseEntity<InfoMessage> handleException(Exception exception){
-        InfoMessage data = new InfoMessage();
-        System.out.println(exception);
-        exception.printStackTrace();
-        data.setInfo(exception.toString());
-        return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
+       return responseFormatter(exception, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler
     public ResponseEntity<InfoMessage> handleException(RuntimeException exception){
+        return responseFormatter(exception, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    public ResponseEntity<InfoMessage> responseFormatter(Exception exception, HttpStatus status) {
         InfoMessage data = new InfoMessage();
-        System.out.println(exception);
-        exception.printStackTrace();
-        data.setInfo(exception.toString());
-        return new ResponseEntity<>(data, HttpStatus.INTERNAL_SERVER_ERROR);
+        data.setInfo(exception.getMessage());
+        return new ResponseEntity<>(data, status);
     }
 }
