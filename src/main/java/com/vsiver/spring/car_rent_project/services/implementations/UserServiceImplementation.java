@@ -13,6 +13,8 @@ import com.vsiver.spring.car_rent_project.user.UserRepository;
 import com.vsiver.spring.car_rent_project.utils.CustomMappers;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +30,8 @@ public class UserServiceImplementation implements UserService {
     private LikeRepository likeRepository;
     private CarRepository carRepository;
 
+    private final Logger logger = LoggerFactory.getLogger(UserServiceImplementation.class);
+
     @Override
     public User readUserById(Integer id) throws NoUserWithSuchIdException {
         return userRepository.findById(id).orElseThrow(()->new NoUserWithSuchIdException("No user with id " + id));
@@ -35,7 +39,7 @@ public class UserServiceImplementation implements UserService {
 
     @Override
     public List<User> readAll() {
-        return null;
+        return userRepository.findAll();
     }
 
     public User getUserByEmail(String email) {
@@ -46,7 +50,7 @@ public class UserServiceImplementation implements UserService {
     @Override
     public User updateUser(UserDto userDto){
         User user = CustomMappers.mapUserDtoToUser(userDto);
-        System.out.println(user);
+        logger.info("Updating user with ID " + user.getId());
         return userRepository.save(user);
     }
 
@@ -72,9 +76,8 @@ public class UserServiceImplementation implements UserService {
     }
 
     public boolean removeLike(Integer userId, Integer carId) {
-        System.out.println(userId + " " + carId);
+        logger.info("User with " + userId + " liked car with ID " + carId);
         Like like = likeRepository.findByUserIdAndCarId(userId, carId);
-        System.out.println(like);
         likeRepository.delete(like);
         return true;
     }

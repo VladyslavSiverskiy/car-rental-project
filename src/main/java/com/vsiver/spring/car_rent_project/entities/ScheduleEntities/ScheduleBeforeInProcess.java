@@ -74,7 +74,6 @@ public class ScheduleBeforeInProcess extends ScheduleTask{
             try {
                 carReservationService.updateCarState(carId, orderId);
             } catch (NoCarWithSuchIdException e) {
-                logger.error("Scheduling exception: " + e.getMessage());
                 throw new SchedulingException(e.getMessage());
             }
         }, getInstant());

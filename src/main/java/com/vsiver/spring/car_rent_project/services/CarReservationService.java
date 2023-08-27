@@ -54,13 +54,19 @@ public class CarReservationService {
     private Jedis jedis;
 
     @Autowired
-    public CarReservationService(TaskScheduler scheduler, CarRepository carRepository, OrderRepository orderRepository) {
+    public CarReservationService(
+            TaskScheduler scheduler,
+            CarRepository carRepository,
+            OrderRepository orderRepository,
+            EmailService emailService
+    ) {
         jedis = new Jedis("localhost", 6379);
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         this.scheduler = scheduler;
         this.carRepository = carRepository;
         this.orderRepository = orderRepository;
+        this.emailService = emailService;
     }
 
     @PostConstruct
@@ -125,7 +131,6 @@ public class CarReservationService {
     public void changeCarStateBeforeInProcess(LocalDateTime reserveFromTime, Car car, Order order) {
         Instant instant = reserveFromTime.minusHours(5).atZone(ZoneId.systemDefault()).toInstant();
         logger.info("Reserved car with id " + car.getCarId() + ", order id " + order.getId());
-        System.out.println(instant);
         ScheduleBeforeInProcess scheduleTask = new ScheduleBeforeInProcess(
                 instant,
                 car,
@@ -160,7 +165,6 @@ public class CarReservationService {
             jedis.set("task:set-expired-status:" + tasksCounter,
                     objectMapper.writeValueAsString(scheduleExpiredOrderStatus));
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
             throw new RuntimeException("Server error while processing entire JSON...");
         }
     }

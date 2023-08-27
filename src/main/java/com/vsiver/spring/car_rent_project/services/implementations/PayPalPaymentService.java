@@ -7,6 +7,8 @@ import com.paypal.orders.*;
 import com.vsiver.spring.car_rent_project.dtos.CreatedOrderDto;
 import com.vsiver.spring.car_rent_project.services.PaymentService;
 import lombok.SneakyThrows;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ public class PayPalPaymentService implements PaymentService {
 
     private static final String APPROVE_LINK_REL = "approve";
     private final PayPalHttpClient payPalHttpClient;
+    private final Logger logger = LoggerFactory.getLogger(PayPalPaymentService.class);
 
     public PayPalPaymentService(@Value("${paypal.clientId}") String clientId,
                                 @Value("${paypal.clientSecret}") String clientSecret) {
@@ -45,7 +48,7 @@ public class PayPalPaymentService implements PaymentService {
     public void captureOrder(String orderId) {
         final OrdersCaptureRequest ordersCaptureRequest = new OrdersCaptureRequest(orderId);
         final HttpResponse<Order> httpResponse = payPalHttpClient.execute(ordersCaptureRequest);
-        System.out.println(("Order Capture Status:" + httpResponse.result().status()));
+        logger.info(("Order Capture Status:" + httpResponse.result().status()));
     }
 
     private OrderRequest createOrderRequest(Double totalAmount, URI returnUrl) {
@@ -71,7 +74,6 @@ public class PayPalPaymentService implements PaymentService {
     }
 
     private LinkDescription extractApprovalLink(Order order) {
-        System.out.println(order);
         LinkDescription approveUri = order.links().stream()
                 .filter(link -> APPROVE_LINK_REL.equals(link.rel()))
                 .findFirst()

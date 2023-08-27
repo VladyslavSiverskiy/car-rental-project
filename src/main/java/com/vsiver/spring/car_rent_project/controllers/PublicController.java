@@ -1,31 +1,18 @@
 package com.vsiver.spring.car_rent_project.controllers;
 
 import com.vsiver.spring.car_rent_project.dtos.CarDto;
-import com.vsiver.spring.car_rent_project.dtos.CreatedOrderDto;
-import com.vsiver.spring.car_rent_project.dtos.RequestOrderDto;
 import com.vsiver.spring.car_rent_project.entities.Order;
-import com.vsiver.spring.car_rent_project.exceptions.CarOutOfStockException;
-import com.vsiver.spring.car_rent_project.exceptions.IncorrectRentTimeException;
 import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
-import com.vsiver.spring.car_rent_project.exceptions.NoUserWithSuchIdException;
 import com.vsiver.spring.car_rent_project.services.*;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.RedirectView;
 import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @AllArgsConstructor

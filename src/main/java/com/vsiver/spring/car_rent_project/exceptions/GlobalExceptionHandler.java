@@ -3,14 +3,20 @@ package com.vsiver.spring.car_rent_project.exceptions;
 import com.vsiver.spring.car_rent_project.dtos.InfoMessage;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.SchedulingException;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(ExpiredJwtException.class)
     public ResponseEntity<InfoMessage> handleException(ExpiredJwtException exception){
         return responseFormatter(exception, HttpStatus.UNAUTHORIZED);
@@ -40,18 +46,26 @@ public class GlobalExceptionHandler {
         return responseFormatter(exception, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<InfoMessage> handleException(BadCredentialsException exception){
         return responseFormatter(exception, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler
-    public ResponseEntity<InfoMessage> handleException(Exception exception){
-       return responseFormatter(exception, HttpStatus.INTERNAL_SERVER_ERROR);
+    @ExceptionHandler(SchedulingException.class)
+    public ResponseEntity<InfoMessage> handleScheduleException(SchedulingException exception){
+        logger.warn("Scheduling exception: " + exception.getMessage());
+        return responseFormatter(exception, HttpStatus.UNAUTHORIZED);
     }
 
     @ExceptionHandler
     public ResponseEntity<InfoMessage> handleException(RuntimeException exception){
+        logger.error("Server exception: " + exception.getMessage());
+        return responseFormatter(exception, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<InfoMessage> handleException(Exception exception){
+        logger.error("Server exception: " + exception.getMessage());
         return responseFormatter(exception, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

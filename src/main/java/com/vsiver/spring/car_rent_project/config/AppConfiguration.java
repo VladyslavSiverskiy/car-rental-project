@@ -51,9 +51,7 @@ public class AppConfiguration {
         return new BCryptPasswordEncoder();
     }
 
-
     //Cors
-
     @Bean
     public WebMvcConfigurer webMvcConfigurer(){
         return new WebMvcConfigurer() {

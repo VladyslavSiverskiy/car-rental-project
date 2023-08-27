@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.TaskScheduler;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.concurrent.ScheduledFuture;
 
 public class ScheduleTimeOfPaymentChecking extends ScheduleTask {
