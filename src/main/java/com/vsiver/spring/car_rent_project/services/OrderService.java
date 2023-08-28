@@ -8,8 +8,6 @@ import com.vsiver.spring.car_rent_project.repositories.CarRepository;
 import com.vsiver.spring.car_rent_project.repositories.OrderRepository;
 import com.vsiver.spring.car_rent_project.user.User;
 import com.vsiver.spring.car_rent_project.user.UserRepository;
-import lombok.AllArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +45,9 @@ public class OrderService {
         order.setOrderState(EOrderState.FINISHED);
         Car car = carRepository.findById(order.getCar().getCarId()).orElseThrow(()->new NoCarWithSuchIdException("No car with such id"));
         car.setInStock(true);
-        //TODO: глянути в order, чи є машина ще зарезрвована
-//        car.setAvailableTo();
         carRepository.save(car);
         orderRepository.save(order);
+        logger.info("Submitting order with ID " + orderId);
         return true;
     }
 
@@ -102,17 +99,10 @@ public class OrderService {
         int res = rentFrom.compareTo(LocalDateTime.now().plusHours(5)); // - 1 менше - значить IN_PROCESS
         if (res != 1) {
             car.setInStock(false);
-//            order.setOrderState(EOrderState.IN_PROCESS);//TODO: зробити коли настав час замовлення та оплата здійснена, якщо ні то скинути повідомлення на пошту
-            //змінити InStock на true після завершення
-        } else {//резервування
+        } else {
             car.setAvailableTo(rentFrom);
-            //заблокувати машину дані в момент 5 год
-            //зробить update
             carReservationService.changeCarStateBeforeInProcess(rentFrom, car, order);
-            //на rent to запланувати перевірку isPayed (якщо оплачено - зробити in process, якщо ні - закрити замовлення і кинути на пошту лист)
-            //TODO: якщо оплата не поступила до rentTo (подивитись метод, змінити його)
         }
-        System.out.println(order);
         carReservationService.setTimeOfPaymentChecking(rentFrom, car, order);
         carReservationService.setExpiredOrderStatusIfTimeLast(rentTo, order);
 

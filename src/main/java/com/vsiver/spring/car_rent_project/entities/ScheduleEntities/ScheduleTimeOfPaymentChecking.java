@@ -14,8 +14,6 @@ public class ScheduleTimeOfPaymentChecking extends ScheduleTask {
 
     private Integer carId;
     private Long orderId;
-
-    private Logger logger = LoggerFactory.getLogger(ScheduleTimeOfPaymentChecking.class);
     private CarReservationService carReservationService;
     private TaskScheduler scheduler;
 
@@ -58,9 +56,6 @@ public class ScheduleTimeOfPaymentChecking extends ScheduleTask {
         this.orderId = orderId;
     }
 
-    public void setLogger(Logger logger) {
-        this.logger = logger;
-    }
 
     public void setCarReservationService(CarReservationService carReservationService) {
         this.carReservationService = carReservationService;
@@ -72,8 +67,6 @@ public class ScheduleTimeOfPaymentChecking extends ScheduleTask {
 
     @Override
     public ScheduledFuture<?> executeTaskScheduling() {
-        return scheduler.schedule(() -> {
-            carReservationService.checkIfOrderIsPayed(orderId, carId);
-        }, getInstant());
+        return scheduler.schedule(() ->  carReservationService.checkIfOrderIsPayed(orderId, carId), getInstant());
     }
 }

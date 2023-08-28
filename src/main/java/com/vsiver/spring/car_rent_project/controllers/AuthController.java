@@ -5,7 +5,6 @@ import com.vsiver.spring.car_rent_project.config.JwtService;
 import com.vsiver.spring.car_rent_project.dtos.AuthenticationRequest;
 import com.vsiver.spring.car_rent_project.dtos.AuthenticationResponse;
 import com.vsiver.spring.car_rent_project.dtos.RegisterRequest;
-import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
 import com.vsiver.spring.car_rent_project.exceptions.UserAlreadyExistException;
 import com.vsiver.spring.car_rent_project.services.EmailService;
 import com.vsiver.spring.car_rent_project.user.Role;

@@ -53,7 +53,7 @@ public class CarDto {
         if (car.getCarReviews() != null) {
             List<ReviewDto> reviewDto = car.getCarReviews().stream()
                     .map(CustomMappers::mapReviewToReviewDto)
-                    .collect(Collectors.toList());
+                    .toList();
             builder.reviews(reviewDto);
         }
 

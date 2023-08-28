@@ -74,11 +74,10 @@ public class PayPalPaymentService implements PaymentService {
     }
 
     private LinkDescription extractApprovalLink(Order order) {
-        LinkDescription approveUri = order.links().stream()
+        return order.links().stream()
                 .filter(link -> APPROVE_LINK_REL.equals(link.rel()))
                 .findFirst()
                 .orElseThrow(NoSuchElementException::new);
-        return approveUri;
     }
 
 }

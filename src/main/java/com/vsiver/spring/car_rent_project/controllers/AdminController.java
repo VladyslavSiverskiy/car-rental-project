@@ -84,7 +84,7 @@ public class AdminController {
                 .stream()
                 .map(CustomMappers::mapOrderToOrderDto)
                 .sorted(descOrderDateComparator())
-                .collect(Collectors.toList())
+                .toList()
         );
     }
 

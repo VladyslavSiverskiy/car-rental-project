@@ -8,7 +8,6 @@ import com.vsiver.spring.car_rent_project.entities.EOrderState;
 import com.vsiver.spring.car_rent_project.entities.Order;
 import com.vsiver.spring.car_rent_project.entities.ScheduleEntities.ScheduleBeforeInProcess;
 import com.vsiver.spring.car_rent_project.entities.ScheduleEntities.ScheduleExpiredOrderStatus;
-import com.vsiver.spring.car_rent_project.entities.ScheduleEntities.ScheduleTask;
 import com.vsiver.spring.car_rent_project.entities.ScheduleEntities.ScheduleTimeOfPaymentChecking;
 import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
 import com.vsiver.spring.car_rent_project.exceptions.NoOrderWithSuchIdException;
@@ -71,8 +70,7 @@ public class CarReservationService {
 
     @PostConstruct
     public void loadTasksFromRedisOnStartup() {
-        // TODO: refactor code
-        // Get keys of all task entries from Redis
+
         Set<String> beforeInProcessTaskKeys = jedis.keys("task:before-in-process:*");
         Set<String> setExpiredTaskKeys = jedis.keys("task:set-expired-status:*");
         Set<String> setPaymentTaskKeys = jedis.keys("task:set-payment-time:*");

@@ -10,7 +10,6 @@ import com.vsiver.spring.car_rent_project.repositories.CategoryRepository;
 import com.vsiver.spring.car_rent_project.user.Role;
 import com.vsiver.spring.car_rent_project.user.User;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -24,7 +23,6 @@ public class CustomMappers {
 
 
     public Car mapCarDtoToCar(CarDto carDto) {
-        System.out.println(carDto);
         Category category = null;
         if (carDto.getCategoryName().equalsIgnoreCase("SUV")) {
             category = categoryRepository.findByCategoryName(ECategories.SUV).get();
