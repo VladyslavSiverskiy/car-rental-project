@@ -1,6 +1,5 @@
 package com.vsiver.spring.car_rent_project.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vsiver.spring.car_rent_project.entities.Car;
@@ -13,7 +12,6 @@ import com.vsiver.spring.car_rent_project.exceptions.NoCarWithSuchIdException;
 import com.vsiver.spring.car_rent_project.exceptions.NoOrderWithSuchIdException;
 import com.vsiver.spring.car_rent_project.repositories.CarRepository;
 import com.vsiver.spring.car_rent_project.repositories.OrderRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +19,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import redis.clients.jedis.Jedis;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
 
 @Service
@@ -50,7 +50,6 @@ public class CarReservationService {
 
     private EmailService emailService;
 
-    private Jedis jedis;
 
     @Autowired
     public CarReservationService(
@@ -59,7 +58,6 @@ public class CarReservationService {
             OrderRepository orderRepository,
             EmailService emailService
     ) {
-        jedis = new Jedis("localhost", 6379);
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         this.scheduler = scheduler;
@@ -68,57 +66,6 @@ public class CarReservationService {
         this.emailService = emailService;
     }
 
-    @PostConstruct
-    public void loadTasksFromRedisOnStartup() {
-
-        Set<String> beforeInProcessTaskKeys = jedis.keys("task:before-in-process:*");
-        Set<String> setExpiredTaskKeys = jedis.keys("task:set-expired-status:*");
-        Set<String> setPaymentTaskKeys = jedis.keys("task:set-payment-time:*");
-
-        for (String taskKey : beforeInProcessTaskKeys) {
-            String taskJson = jedis.get(taskKey);
-            if (taskJson != null && !taskJson.isEmpty()) {
-                try {
-                    ScheduleBeforeInProcess scheduleTask = objectMapper.readValue(taskJson, ScheduleBeforeInProcess.class);
-                    scheduleTask.setCarReservationService(this);
-                    scheduleTask.setScheduler(scheduler);
-                    scheduleTask.executeTaskScheduling();
-                    logger.info("Download task before from redis");
-                } catch (JsonProcessingException e) {
-                    logger.error("Error while deserializing task from JSON: " + e.getMessage());
-                }
-            }
-        }
-
-        for (String taskKey : setExpiredTaskKeys) {
-            String taskJson = jedis.get(taskKey);
-            if (taskJson != null && !taskJson.isEmpty()) {
-                try {
-                    ScheduleExpiredOrderStatus scheduleTask = objectMapper.readValue(taskJson, ScheduleExpiredOrderStatus.class);
-                    scheduleTask.setCarReservationService(this);
-                    scheduleTask.setScheduler(scheduler);
-                    scheduleTask.executeTaskScheduling();
-                } catch (JsonProcessingException e) {
-                    logger.warn("Error while deserializing task from JSON: " + e.getMessage());
-                }
-            }
-        }
-
-        for (String taskKey : setPaymentTaskKeys) {
-            String taskJson = jedis.get(taskKey);
-            if (taskJson != null && !taskJson.isEmpty()) {
-                try {
-                    ScheduleTimeOfPaymentChecking scheduleTask = objectMapper.readValue(taskJson, ScheduleTimeOfPaymentChecking.class);
-                    scheduleTask.setCarReservationService(this);
-                    scheduleTask.setScheduler(scheduler);
-                    scheduleTask.executeTaskScheduling();
-                } catch (JsonProcessingException e) {
-                    logger.warn("Error while deserializing task from JSON: " + e.getMessage());
-                }
-            }
-        }
-
-    }
 
     /**
      * changing the order state (from IS_RESERVED to IN_PROCESS) in 5 hours before reservation
@@ -139,11 +86,6 @@ public class CarReservationService {
         ScheduledFuture<?> scheduledTask = scheduleTask.executeTaskScheduling();
         tasksCounter++;
         scheduledTasks.add(scheduledTask);
-        try {
-            jedis.set("task:before-in-process:" + tasksCounter, objectMapper.writeValueAsString(scheduleTask));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Server error while processing entire JSON...");
-        }
     }
 
 
@@ -159,12 +101,6 @@ public class CarReservationService {
         ScheduledFuture<?> scheduledTask = scheduleExpiredOrderStatus.executeTaskScheduling();
         scheduledTasks.add(scheduledTask);
         tasksCounter++;
-        try {
-            jedis.set("task:set-expired-status:" + tasksCounter,
-                    objectMapper.writeValueAsString(scheduleExpiredOrderStatus));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("Server error while processing entire JSON...");
-        }
     }
 
     public void setTimeOfPaymentChecking(LocalDateTime rentFrom, Car car, Order order) {
@@ -181,13 +117,6 @@ public class CarReservationService {
         ScheduledFuture<?> scheduledTask = scheduleTimeOfPaymentChecking.executeTaskScheduling();
         scheduledTasks.add(scheduledTask);
         tasksCounter++;
-        try {
-            jedis.set("task:set-payment-time:" + tasksCounter,
-                    objectMapper.writeValueAsString(scheduleTimeOfPaymentChecking));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            throw new RuntimeException("Server error while processing entire JSON...");
-        }
     }
 
     public void checkExpired(Long orderId) {
