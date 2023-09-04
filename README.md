@@ -7,7 +7,7 @@ This project aims to create a simple web application that allows users to rent c
 <ul>
   <li>Spring Boot</li>
   <li>Spring Data JPA</li>
-  <li>Spring Security</li>
+  <li>Spring Security (JWT token authentication)</li>
   <li>PostgreSQL</li>
   <li>Maven</li>
   <li>Swagger</li>
