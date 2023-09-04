@@ -61,7 +61,7 @@ public class AppConfiguration {
                 registry.addMapping("/**")
                         .allowedHeaders("*")
                         .allowedMethods("*")
-                        .allowedOrigins("http://localhost:3000");
+                        .allowedOrigins("*");
             }
         };
     }

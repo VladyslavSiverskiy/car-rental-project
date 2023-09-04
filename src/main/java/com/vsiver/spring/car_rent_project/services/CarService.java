@@ -36,11 +36,6 @@ public class CarService {
     }
 
     public CarDto saveOrUpdateCar(CarDto carDto) {
-        logger.info(carDto.getCarId() == 0 ?
-                "saving new car in database, model is " + carDto.getModel() :
-                "updating car with ID " + carDto.getCarId()
-        );
-        logger.info("saving car with id ");
         Car car = customMappers.mapCarDtoToCar(carDto);
         carRepository.save(car);
         return customMappers.mapCarToCarDto(car);
