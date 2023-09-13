@@ -10,8 +10,8 @@ import java.util.List;
 @Table(name = "cars")
 public class Car {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "car_id")
     private Integer carId;
 
