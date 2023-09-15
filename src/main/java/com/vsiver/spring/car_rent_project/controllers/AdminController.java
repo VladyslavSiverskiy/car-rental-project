@@ -36,7 +36,7 @@ public class AdminController {
     @Autowired
     private OrderService orderService;
 
-    private final Logger somelogger = LoggerFactory.getLogger(AdminController.class);
+    private final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
     @GetMapping("/check")
     public ResponseEntity<Boolean> checkAdminState() {
