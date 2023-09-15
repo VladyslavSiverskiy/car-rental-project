@@ -1,7 +1,5 @@
 package com.vsiver.spring.car_rent_project.entities.ScheduleEntities;
 
-import com.vsiver.spring.car_rent_project.entities.Car;
-import com.vsiver.spring.car_rent_project.entities.EOrderState;
 import com.vsiver.spring.car_rent_project.entities.Order;
 import com.vsiver.spring.car_rent_project.services.CarReservationService;
 import org.slf4j.Logger;
@@ -14,7 +12,7 @@ import java.util.concurrent.ScheduledFuture;
 public class ScheduleExpiredOrderStatus extends ScheduleTask {
 
     private Long orderId;
-    private Logger logger = LoggerFactory.getLogger(ScheduleBeforeInProcess.class);
+    private Logger logger = LoggerFactory.getLogger(ScheduleExpiredOrderStatus.class);
     private CarReservationService carReservationService;
     private TaskScheduler scheduler;
 

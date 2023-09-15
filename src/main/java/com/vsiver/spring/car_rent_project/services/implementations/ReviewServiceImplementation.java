@@ -24,8 +24,7 @@ public class ReviewServiceImplementation implements ReviewService {
 
     @Override
     public Review update(Review review) {
-        if (Objects.isNull(review)) throw new IllegalArgumentException("Review cannot be null");
-        return reviewRepository.save(review);
+         return create(review);
     }
 
     @Override

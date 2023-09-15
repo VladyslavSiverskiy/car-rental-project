@@ -140,11 +140,11 @@ public class Order {
         this.orderSum = orderSum;
     }
 
-    public Boolean isPayed() {
+    public boolean isPayed() {
         return isPayed;
     }
 
-    public void setPayed(Boolean payed) {
+    public void setPayed(boolean payed) {
         isPayed = payed;
     }
 

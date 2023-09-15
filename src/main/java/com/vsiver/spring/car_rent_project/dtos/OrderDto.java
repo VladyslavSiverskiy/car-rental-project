@@ -1,10 +1,6 @@
 package com.vsiver.spring.car_rent_project.dtos;
 
-import com.vsiver.spring.car_rent_project.entities.Car;
 import com.vsiver.spring.car_rent_project.entities.EOrderState;
-import com.vsiver.spring.car_rent_project.user.User;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

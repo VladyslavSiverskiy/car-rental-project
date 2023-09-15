@@ -9,6 +9,8 @@ import com.vsiver.spring.car_rent_project.services.S3Service;
 import com.vsiver.spring.car_rent_project.services.CarService;
 import com.vsiver.spring.car_rent_project.services.OrderService;
 import com.vsiver.spring.car_rent_project.utils.CustomMappers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,11 +36,8 @@ public class AdminController {
     @Autowired
     private OrderService orderService;
 
+    private final Logger logger = LoggerFactory.getLogger(AdminController.class);
 
-
-    
-    private final Logger someotherlogger = LoggerFactory.getLogger(AdminController.class);
-    
     @GetMapping("/check")
     public ResponseEntity<Boolean> checkAdminState() {
         return ResponseEntity.ok(true);
@@ -60,12 +59,13 @@ public class AdminController {
 
     @PostMapping("/cars")
     public ResponseEntity<CarDto> addCar(@RequestBody CarDto carDto) {
-        System.out.println(carDto);
+        logger.info("Attempt to create car in DB.");
         return ResponseEntity.ok(carService.saveOrUpdateCar(carDto));
     }
 
     @PutMapping("/cars")
     public ResponseEntity<CarDto> updateCar(@RequestBody CarDto carDto) {
+        logger.info("Attempt to update car with ID " + carDto.getCarId() +  " in DB.");
         return ResponseEntity.ok(carService.saveOrUpdateCar(carDto));
     }
 
@@ -84,7 +84,7 @@ public class AdminController {
                 .stream()
                 .map(CustomMappers::mapOrderToOrderDto)
                 .sorted(descOrderDateComparator())
-                .collect(Collectors.toList())
+                .toList()
         );
     }
 

@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class InfoMessage {
 
-    public String info;
+    private String info;
 }

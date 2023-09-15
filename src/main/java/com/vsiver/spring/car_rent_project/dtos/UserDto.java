@@ -2,7 +2,6 @@ package com.vsiver.spring.car_rent_project.dtos;
 
 import lombok.Builder;
 import lombok.Data;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 @Data
 @Builder

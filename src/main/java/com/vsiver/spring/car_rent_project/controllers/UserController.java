@@ -144,7 +144,6 @@ public class UserController {
     @PostMapping("/orders/create")
     public ResponseEntity<CreatedOrderDto> createOrder(@RequestBody RequestOrderDto requestOrder, HttpServletRequest request) throws IOException, NoCarWithSuchIdException, NoUserWithSuchIdException, CarOutOfStockException, IncorrectRentTimeException {
         URI returnUrl = buildReturnUrl(request);
-        System.out.println(requestOrder);
         requestOrder.setRentFrom(requestOrder.getRentFrom().plusHours(3));
         requestOrder.setRentTo(requestOrder.getRentTo().plusHours(3));
         if (Objects.isNull(requestOrder.getTotalAmount())) throw new IllegalArgumentException("Amount is null");
@@ -178,7 +177,7 @@ public class UserController {
                 orderService.getOrdersByUserId(userId)
                         .stream()
                         .map(CustomMappers::mapOrderToOrderDto)
-                        .collect(Collectors.toList())
+                        .toList()
         );
     }
 
